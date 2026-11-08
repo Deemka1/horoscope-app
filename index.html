@@ -205,7 +205,7 @@
             resultDiv.classList.add('hidden');
 
             try {
-                const url = `https://horoscope-api.fit-for.workers.dev/?city=${encodeURIComponent(city)}&year=${year}&month=${month}&day=${day}&hour=${hour}&minute=${minute}`;
+                const url = `https://hastro-calc.fit-for.workers.dev/?city=${encodeURIComponent(city)}&year=${year}&month=${month}&day=${day}&hour=${hour}&minute=${minute}`;
                 const response = await fetch(url);
                 const data = await response.json();
 
