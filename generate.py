@@ -2,7 +2,6 @@ import json
 from datetime import datetime, timedelta
 from kerykeion import AstrologicalSubjectFactory
 
-# Маппинг сокращений kerykeion в полные названия
 SIGN_MAP = {
     'Ari': 'Aries', 'Tau': 'Taurus', 'Gem': 'Gemini', 'Can': 'Cancer',
     'Leo': 'Leo', 'Vir': 'Virgo', 'Lib': 'Libra', 'Sco': 'Scorpio',
@@ -148,7 +147,6 @@ YEARLY_TEXTS = {
 }
 
 def normalize_sign(short_sign):
-    """Преобразует сокращение kerykeion в полное название"""
     return SIGN_MAP.get(short_sign, short_sign)
 
 def get_astro_data(days_offset):
@@ -194,7 +192,6 @@ def get_text_for_period(sign, period):
         return {"focus": "Месячная тема", "do": MONTHLY_TEXTS[sign_lower][idx], "avoid": "Игнорирования деталей"}
     elif period == "this_year":
         return {"focus": "Годовая тема", "do": YEARLY_TEXTS[sign_lower], "avoid": "Отклонения от пути"}
-    
     return {"focus": "", "do": "", "avoid": ""}
 
 PERIODS = {"today": 0, "tomorrow": 1, "this_week": 7, "next_week": 14, "this_month": 30, "next_month": 60, "this_year": 365}
@@ -207,13 +204,13 @@ for sign in SIGNS:
         astro = get_astro_data(days_offset)
         texts = get_text_for_period(sign, period_name)
         
-        mercury_status = "ретро ⚠️" if astro["mercury_retrograde"] else "прямой ✅"
+        mercury_status = "ретроградный" if astro["mercury_retrograde"] else "прямой"
         astro_fact = (
-            f"☉ Солнце: {astro['sun_sign']} | "
-            f"☽ Луна: {astro['moon_sign']} | "
-            f"☿ Меркурий: {astro['mercury_sign']} ({mercury_status}) | "
-            f"♀ Венера: {astro['venus_sign']} | "
-            f"♂ Марс: {astro['mars_sign']}"
+            f"Солнце: {astro['sun_sign']} | "
+            f"Луна: {astro['moon_sign']} | "
+            f"Меркурий: {astro['mercury_sign']} ({mercury_status}) | "
+            f"Венера: {astro['venus_sign']} | "
+            f"Марс: {astro['mars_sign']}"
         )
         
         venus_text = VENUS_INTERPRETATIONS[astro['venus_sign']]
@@ -244,4 +241,4 @@ horoscope['meta'] = {
 with open('horoscope.json', 'w', encoding='utf-8') as f:
     json.dump(horoscope, f, ensure_ascii=False, indent=2)
 
-print("✅ Гороскоп с 5 планетами сгенерирован!")
+print("Гороскоп успешно сгенерирован")
