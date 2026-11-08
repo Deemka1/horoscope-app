@@ -4,6 +4,9 @@ on:
     - cron: '0 0 * * *'
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   update:
     runs-on: ubuntu-latest
@@ -31,6 +34,6 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add horoscope.json
-          git diff --quiet && git diff --staged --quiet || (git commit -m "Update horoscope" && git push)
+          git diff --quiet && git diff --staged --quiet || (git commit -m "chore: auto-update horoscope" && git push)
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
