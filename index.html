@@ -6,31 +6,112 @@
     <title>Астро-факты</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0a0a0a; color: #fff; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; 
+            background: #0a0a0a; 
+            color: #fff; 
+            min-height: 100vh; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            padding: 20px; 
+        }
         .container { max-width: 600px; width: 100%; }
         h1 { font-size: 1.8rem; margin-bottom: 20px; text-align: center; font-weight: 300; letter-spacing: 1px; }
         
         .sign-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
-        .sign-btn { background: #1a1a1a; border: 1px solid #333; color: #fff; padding: 12px 5px; border-radius: 8px; cursor: pointer; transition: all 0.2s; font-size: 0.85rem; }
+        .sign-btn { 
+            background: #1a1a1a; 
+            border: 1px solid #333; 
+            color: #fff; 
+            padding: 12px 5px; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            transition: all 0.2s; 
+            font-size: 0.85rem; 
+        }
         .sign-btn:hover { background: #2a2a2a; border-color: #555; }
         .sign-btn.active { background: #2a2a2a; border-color: #fff; font-weight: bold; }
         
-        .tabs { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 20px; border-bottom: 1px solid #333; scrollbar-width: none; }
-        .tabs::-webkit-scrollbar { display: none; }
-        .tab-btn { background: transparent; border: none; color: #666; padding: 8px 12px; cursor: pointer; font-size: 0.9rem; white-space: nowrap; transition: all 0.2s; border-radius: 6px; }
-        .tab-btn:hover { color: #fff; background: #1a1a1a; }
-        .tab-btn.active { color: #fff; background: #333; font-weight: bold; }
+        .tabs-container { 
+            overflow-x: auto; 
+            white-space: nowrap; 
+            margin-bottom: 20px; 
+            padding-bottom: 10px;
+            border-bottom: 1px solid #333;
+            -webkit-overflow-scrolling: touch;
+        }
+        .tabs { 
+            display: inline-flex; 
+            gap: 8px; 
+        }
+        .tab-btn { 
+            background: #1a1a1a;
+            border: 1px solid #333;
+            color: #888; 
+            padding: 10px 15px; 
+            cursor: pointer; 
+            font-size: 0.85rem; 
+            border-radius: 6px;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .tab-btn:hover { color: #fff; border-color: #555; }
+        .tab-btn.active { 
+            background: #fff; 
+            color: #000; 
+            font-weight: bold; 
+            border-color: #fff;
+        }
 
-        .horoscope-card { background: #1a1a1a; border: 1px solid #333; border-radius: 12px; padding: 20px; }
+        .horoscope-card { 
+            background: #1a1a1a; 
+            border: 1px solid #333; 
+            border-radius: 12px; 
+            padding: 20px; 
+            min-height: 300px;
+        }
         .section { margin-bottom: 18px; }
-        .section-title { font-size: 0.75rem; text-transform: uppercase; color: #888; margin-bottom: 6px; letter-spacing: 1px; }
-        .section-content { font-size: 1.05rem; line-height: 1.5; color: #e0e0e0; }
+        .section-title { 
+            font-size: 0.75rem; 
+            text-transform: uppercase; 
+            color: #888; 
+            margin-bottom: 6px; 
+            letter-spacing: 1px; 
+        }
+        .section-content { 
+            font-size: 1.05rem; 
+            line-height: 1.5; 
+            color: #e0e0e0; 
+        }
         
-        .astro-fact { background: #252525; border-left: 3px solid #555; padding: 12px; margin-bottom: 20px; border-radius: 0 8px 8px 0; font-size: 0.9rem; color: #ccc; }
-        .date-ref { font-size: 0.8rem; color: #666; text-align: right; margin-bottom: 15px; font-style: italic; }
+        .astro-fact { 
+            background: #252525; 
+            border-left: 3px solid #4CAF50; 
+            padding: 12px; 
+            margin-bottom: 20px; 
+            border-radius: 0 8px 8px 0; 
+            font-size: 0.9rem; 
+            color: #ccc; 
+        }
+        .date-ref { 
+            font-size: 0.8rem; 
+            color: #666; 
+            text-align: right; 
+            margin-bottom: 15px; 
+            font-style: italic; 
+        }
         
-        .meta { font-size: 0.75rem; color: #555; text-align: center; margin-top: 25px; padding-top: 15px; border-top: 1px solid #222; }
+        .meta { 
+            font-size: 0.75rem; 
+            color: #555; 
+            text-align: center; 
+            margin-top: 25px; 
+            padding-top: 15px; 
+            border-top: 1px solid #222; 
+        }
         .hidden { display: none; }
+        .error-msg { color: #ff6b6b; text-align: center; padding: 20px; }
     </style>
 </head>
 <body>
@@ -52,25 +133,31 @@
         </div>
 
         <div id="horoscopeCard" class="horoscope-card hidden">
-            <div class="tabs" id="tabsContainer">
-                <button class="tab-btn active" data-tab="today">Сегодня</button>
-                <button class="tab-btn" data-tab="tomorrow">Завтра</button>
-                <button class="tab-btn" data-tab="this_week">Эта неделя</button>
-                <button class="tab-btn" data-tab="next_week">След. неделя</button>
-                <button class="tab-btn" data-tab="this_month">Этот месяц</button>
-                <button class="tab-btn" data-tab="next_month">След. месяц</button>
-                <button class="tab-btn" data-tab="this_year">Этот год</button>
+            <div class="tabs-container">
+                <div class="tabs">
+                    <button class="tab-btn active" data-tab="today">Сегодня</button>
+                    <button class="tab-btn" data-tab="tomorrow">Завтра</button>
+                    <button class="tab-btn" data-tab="this_week">Эта неделя</button>
+                    <button class="tab-btn" data-tab="next_week">След. неделя</button>
+                    <button class="tab-btn" data-tab="this_month">Этот месяц</button>
+                    <button class="tab-btn" data-tab="next_month">След. месяц</button>
+                    <button class="tab-btn" data-tab="this_year">Этот год</button>
+                </div>
             </div>
 
-            <div class="date-ref" id="dateRef"></div>
-            <div class="astro-fact" id="astroFact"></div>
+            <div id="loadingMsg" style="text-align: center; color: #888; padding: 40px;">Загрузка данных...</div>
+            
+            <div id="contentArea" class="hidden">
+                <div class="date-ref" id="dateRef"></div>
+                <div class="astro-fact" id="astroFact"></div>
 
-            <div class="section"><div class="section-title">Фокус периода</div><div class="section-content" id="content-focus"></div></div>
-            <div class="section"><div class="section-title">Рекомендуется</div><div class="section-content" id="content-do"></div></div>
-            <div class="section"><div class="section-title">Категорически избегать</div><div class="section-content" id="content-avoid"></div></div>
+                <div class="section"><div class="section-title">Фокус периода</div><div class="section-content" id="content-focus"></div></div>
+                <div class="section"><div class="section-title">Рекомендуется</div><div class="section-content" id="content-do"></div></div>
+                <div class="section"><div class="section-title">Категорически избегать</div><div class="section-content" id="content-avoid"></div></div>
+            </div>
 
             <div class="meta" id="meta"></div>
-        </div
+        </div>
     </div>
 
     <script>
@@ -78,14 +165,23 @@
         let currentSign = null;
         let currentTab = 'today';
 
+        // Загрузка данных
         fetch('horoscope.json')
-            .then(r => r.json())
+            .then(r => {
+                if (!r.ok) throw new Error('Файл не найден');
+                return r.json();
+            })
             .then(data => { 
                 horoscopeData = data; 
                 const rx = data.meta.current_mercury_rx ? "⚠️ Меркурий ретроградный" : "✅ Меркурий прямой";
                 document.getElementById('meta').textContent = `Система работает на реальных эфемеридах. Текущая Луна: ${data.meta.current_moon}. ${rx}.`;
+                if (currentSign) renderContent();
             })
-            .catch(err => console.error('Ошибка загрузки:', err));
+            .catch(err => {
+                console.error('Ошибка загрузки:', err);
+                document.getElementById('loadingMsg').textContent = 'Ошибка загрузки данных. Попробуйте обновить страницу через 2 минуты.';
+                document.getElementById('loadingMsg').className = 'error-msg';
+            });
 
         document.querySelectorAll('.sign-btn').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -107,9 +203,23 @@
         });
 
         function renderContent() {
-            if (!horoscopeData || !currentSign) return;
+            if (!horoscopeData || !currentSign) {
+                document.getElementById('loadingMsg').textContent = 'Данные еще загружаются...';
+                return;
+            }
+
+            // Проверяем, есть ли данные для этого периода
+            if (!horoscopeData[currentSign] || !horoscopeData[currentSign][currentTab]) {
+                document.getElementById('loadingMsg').textContent = 'Данные для этого периода временно недоступны.';
+                document.getElementById('loadingMsg').className = 'error-msg';
+                document.getElementById('contentArea').classList.add('hidden');
+                return;
+            }
 
             const data = horoscopeData[currentSign][currentTab];
+            
+            document.getElementById('loadingMsg').classList.add('hidden');
+            document.getElementById('contentArea').classList.remove('hidden');
             
             document.getElementById('dateRef').textContent = `Ориентировочная дата расчета: ${data.date_ref}`;
             document.getElementById('astroFact').textContent = `🪐 Астро-факт: ${data.astro_fact}`;
