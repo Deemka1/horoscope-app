@@ -44,6 +44,11 @@
         .ascendant-result h3 { font-size: 1.1rem; margin-bottom: 10px; color: #4CAF50; }
         .ascendant-result p { font-size: 0.95rem; line-height: 1.5; color: #ccc; margin-bottom: 8px; }
         .error-msg { color: #ff6b6b; text-align: center; padding: 10px; }
+        
+        /* Стили для чекбокса переключения */
+        .time-toggle { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; padding: 10px; background: #1a1a1a; border-radius: 6px; border: 1px solid #333; }
+        .time-toggle input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; }
+        .time-toggle label { font-size: 0.9rem; color: #ccc; cursor: pointer; margin: 0; }
     </style>
 </head>
 <body>
@@ -102,15 +107,32 @@
                 <div class="form-group"><label>Год</label><input type="number" id="yearInput" min="1900" max="2030" value="1990"></div>
             </div>
             
-            <!-- НОВОЕ: Выбор времени суток вместо точных часов -->
-            <div class="form-group">
-                <label>Время рождения (примерно)</label>
-                <select id="timeOfDay">
-                    <option value="09:00">Утро (06:00 - 11:59)</option>
-                    <option value="15:00" selected>День (12:00 - 17:59)</option>
-                    <option value="21:00">Вечер (18:00 - 23:59)</option>
-                    <option value="03:00">Ночь (00:00 - 05:59)</option>
-                </select>
+            <!-- Чекбокс переключения -->
+            <div class="time-toggle">
+                <input type="checkbox" id="approximateTime" onchange="toggleTimeInput()">
+                <label for="approximateTime">Не помню точное время, выбрать примерное</label>
+            </div>
+
+            <!-- Точное время (по умолчанию видно) -->
+            <div id="exactTimeBlock">
+                <div class="form-row">
+                    <div class="form-group"><label>Часы</label><input type="number" id="hourInput" min="0" max="23" value="14"></div>
+                    <div class="form-group"><label>Минуты</label><input type="number" id="minuteInput" min="0" max="59" value="30"></div>
+                    <div class="form-group"><label>&nbsp;</label><div style="height: 42px;"></div></div>
+                </div>
+            </div>
+
+            <!-- Примерное время (по умолчанию скрыто) -->
+            <div id="approximateTimeBlock" class="hidden">
+                <div class="form-group">
+                    <label>Примерное время рождения</label>
+                    <select id="timeOfDay">
+                        <option value="09:00">Утро (06:00 - 11:59)</option>
+                        <option value="15:00" selected>День (12:00 - 17:59)</option>
+                        <option value="21:00">Вечер (18:00 - 23:59)</option>
+                        <option value="03:00">Ночь (00:00 - 05:59)</option>
+                    </select>
+                </div>
             </div>
 
             <button class="calc-btn" id="calcBtn" onclick="calculateAscendant()">Рассчитать</button>
@@ -163,15 +185,39 @@
             document.getElementById('content-avoid').textContent = data.avoid;
         }
 
+        // Переключение между точным и примерным временем
+        function toggleTimeInput() {
+            const isApproximate = document.getElementById('approximateTime').checked;
+            const exactBlock = document.getElementById('exactTimeBlock');
+            const approxBlock = document.getElementById('approximateTimeBlock');
+            
+            if (isApproximate) {
+                exactBlock.classList.add('hidden');
+                approxBlock.classList.remove('hidden');
+            } else {
+                exactBlock.classList.remove('hidden');
+                approxBlock.classList.add('hidden');
+            }
+        }
+
         async function calculateAscendant() {
             const city = document.getElementById('cityInput').value.trim();
             const day = document.getElementById('dayInput').value;
             const month = document.getElementById('monthInput').value;
             const year = document.getElementById('yearInput').value;
+            const isApproximate = document.getElementById('approximateTime').checked;
             
-            // Берем время из выпадающего списка (например, "15:00")
-            const timeString = document.getElementById('timeOfDay').value;
-            const [hour, minute] = timeString.split(':');
+            let hour, minute;
+            
+            if (isApproximate) {
+                // Берем время из выпадающего списка
+                const timeString = document.getElementById('timeOfDay').value;
+                [hour, minute] = timeString.split(':');
+            } else {
+                // Берем точное время из полей
+                hour = document.getElementById('hourInput').value;
+                minute = document.getElementById('minuteInput').value;
+            }
 
             if (!city || !day || !month || !year) {
                 showAscendantError('Заполните город и дату рождения');
@@ -196,11 +242,12 @@
                 if (data.error) {
                     showAscendantError(data.error);
                 } else {
+                    const timeLabel = isApproximate ? '(примерно)' : '';
                     resultDiv.innerHTML = `
                         <div class="ascendant-result">
                             <h3>♈ Асцендент в знаке ${data.ascendant.sign}</h3>
                             <p><strong>Градус:</strong> ${data.ascendant.degree_in_sign}</p>
-                            <p><strong>Расчетное время:</strong> ${hour}:${minute} (примерно)</p>
+                            <p><strong>Время расчета:</strong> ${hour}:${minute} ${timeLabel}</p>
                             <p><strong>Город:</strong> ${data.city}</p>
                             <p style="margin-top: 12px; border-top: 1px solid #333; padding-top: 10px; font-style: italic;">${data.interpretation}</p>
                         </div>
