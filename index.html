@@ -30,7 +30,6 @@
         .meta { font-size: 0.75rem; color: #555; text-align: center; margin-top: 25px; padding-top: 15px; border-top: 1px solid #222; }
         .hidden { display: none; }
         
-        /* Стили для формы асцендента */
         .ascendant-section { margin-top: 30px; padding-top: 20px; border-top: 1px solid #333; }
         .ascendant-section h2 { font-size: 1.3rem; margin-bottom: 15px; text-align: center; font-weight: 400; }
         .form-group { margin-bottom: 12px; }
@@ -85,16 +84,13 @@
                 <div class="astro-fact" id="astroFact"></div>
                 <div class="planet-card venus" id="venusCard"></div>
                 <div class="planet-card mars" id="marsCard"></div>
-
                 <div class="section"><div class="section-title">Фокус периода</div><div class="section-content" id="content-focus"></div></div>
                 <div class="section"><div class="section-title">Рекомендуется</div><div class="section-content" id="content-do"></div></div>
                 <div class="section"><div class="section-title">Категорически избегать</div><div class="section-content" id="content-avoid"></div></div>
             </div>
-
             <div class="meta" id="meta"></div>
         </div>
 
-        <!-- Форма расчета асцендента -->
         <div class="ascendant-section">
             <h2>🔮 Рассчитать Асцендент</h2>
             <div class="form-group">
@@ -102,32 +98,14 @@
                 <input type="text" id="cityInput" placeholder="Например: Москва" value="Москва">
             </div>
             <div class="form-row">
-                <div class="form-group">
-                    <label>День</label>
-                    <input type="number" id="dayInput" min="1" max="31" placeholder="15" value="15">
-                </div>
-                <div class="form-group">
-                    <label>Месяц</label>
-                    <input type="number" id="monthInput" min="1" max="12" placeholder="5" value="5">
-                </div>
-                <div class="form-group">
-                    <label>Год</label>
-                    <input type="number" id="yearInput" min="1900" max="2030" placeholder="1990" value="1990">
-                </div>
+                <div class="form-group"><label>День</label><input type="number" id="dayInput" min="1" max="31" value="15"></div>
+                <div class="form-group"><label>Месяц</label><input type="number" id="monthInput" min="1" max="12" value="5"></div>
+                <div class="form-group"><label>Год</label><input type="number" id="yearInput" min="1900" max="2030" value="1990"></div>
             </div>
             <div class="form-row">
-                <div class="form-group">
-                    <label>Часы</label>
-                    <input type="number" id="hourInput" min="0" max="23" placeholder="14" value="14">
-                </div>
-                <div class="form-group">
-                    <label>Минуты</label>
-                    <input type="number" id="minuteInput" min="0" max="59" placeholder="30" value="30">
-                </div>
-                <div class="form-group">
-                    <label>&nbsp;</label>
-                    <button class="calc-btn" id="calcBtn" onclick="calculateAscendant()">Рассчитать</button>
-                </div>
+                <div class="form-group"><label>Часы</label><input type="number" id="hourInput" min="0" max="23" value="14"></div>
+                <div class="form-group"><label>Минуты</label><input type="number" id="minuteInput" min="0" max="59" value="30"></div>
+                <div class="form-group"><label>&nbsp;</label><button class="calc-btn" id="calcBtn" onclick="calculateAscendant()">Рассчитать</button></div>
             </div>
             <div id="ascendantResult" class="hidden"></div>
         </div>
@@ -138,14 +116,11 @@
         let currentSign = null;
         let currentTab = 'today';
 
-        fetch('horoscope.json')
-            .then(r => r.json())
-            .then(data => { 
-                horoscopeData = data; 
-                const rx = data.meta.current_mercury_rx ? "⚠️ Меркурий ретроградный" : "✅ Меркурий прямой";
-                document.getElementById('meta').textContent = `Система на реальных эфемеридах. Луна: ${data.meta.current_moon}. ${rx}.`;
-            })
-            .catch(err => console.error('Ошибка:', err));
+        fetch('horoscope.json').then(r => r.json()).then(data => { 
+            horoscopeData = data; 
+            const rx = data.meta.current_mercury_rx ? "⚠️ Меркурий ретроградный" : "✅ Меркурий прямой";
+            document.getElementById('meta').textContent = `Система на реальных эфемеридах. Луна: ${data.meta.current_moon}. ${rx}.`;
+        }).catch(err => console.error('Ошибка:', err));
 
         document.querySelectorAll('.sign-btn').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -170,10 +145,8 @@
             if (!horoscopeData || !currentSign) return;
             const data = horoscopeData[currentSign][currentTab];
             if (!data) return;
-
             document.getElementById('loadingMsg').classList.add('hidden');
             document.getElementById('contentArea').classList.remove('hidden');
-            
             document.getElementById('dateRef').textContent = `Дата расчета: ${data.date_ref}`;
             document.getElementById('astroFact').textContent = data.astro_fact;
             document.getElementById('venusCard').textContent = `♀ Венера: ${data.venus}`;
@@ -183,7 +156,6 @@
             document.getElementById('content-avoid').textContent = data.avoid;
         }
 
-        // Расчет асцендента через Cloudflare Worker
         async function calculateAscendant() {
             const city = document.getElementById('cityInput').value.trim();
             const day = document.getElementById('dayInput').value;
@@ -205,9 +177,15 @@
             resultDiv.classList.add('hidden');
 
             try {
-                const url = `https://hastro-calc.fit-for.workers.dev/?city=${encodeURIComponent(city)}&year=${year}&month=${month}&day=${day}&hour=${hour}&minute=${minute}`;
+                // !!! ЗДЕСЬ УЖЕ ПРАВИЛЬНАЯ НОВАЯ ССЫЛКА !!!
+                const url = `https://astro-calc.fit-for.workers.dev/?city=${encodeURIComponent(city)}&year=${year}&month=${month}&day=${day}&hour=${hour}&minute=${minute}`;
+                console.log('Отправляем запрос на:', url);
+                
                 const response = await fetch(url);
+                if (!response.ok) throw new Error('Ошибка сети: ' + response.status);
+                
                 const data = await response.json();
+                console.log('Получен ответ:', data);
 
                 if (data.error) {
                     showAscendantError(data.error);
@@ -224,7 +202,8 @@
                     resultDiv.classList.remove('hidden');
                 }
             } catch (error) {
-                showAscendantError('Ошибка соединения с сервером. Попробуйте позже.');
+                console.error('Ошибка:', error);
+                showAscendantError('Ошибка соединения. Проверьте консоль (F12) или попробуйте позже.');
             } finally {
                 btn.disabled = false;
                 btn.textContent = 'Рассчитать';
