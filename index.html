@@ -112,6 +112,16 @@
         }
         .hidden { display: none; }
         .error-msg { color: #ff6b6b; text-align: center; padding: 20px; }
+        .debug-info { 
+            background: #1a1a1a; 
+            border: 1px solid #333; 
+            padding: 10px; 
+            margin: 10px 0; 
+            font-family: monospace; 
+            font-size: 0.75rem; 
+            color: #888; 
+            word-break: break-all;
+        }
     </style>
 </head>
 <body>
@@ -165,27 +175,45 @@
         let currentSign = null;
         let currentTab = 'today';
 
+        console.log('Начало загрузки horoscope.json...');
+
         // Загрузка данных
         fetch('horoscope.json')
             .then(r => {
-                if (!r.ok) throw new Error('Файл не найден');
+                console.log('Статус ответа:', r.status);
+                if (!r.ok) throw new Error('Файл не найден: ' + r.status);
                 return r.json();
             })
             .then(data => { 
+                console.log('Данные загружены:', data);
+                console.log('Ключи данных:', Object.keys(data));
                 horoscopeData = data; 
-                const rx = data.meta.current_mercury_rx ? "⚠️ Меркурий ретроградный" : "✅ Меркурий прямой";
-                document.getElementById('meta').textContent = `Система работает на реальных эфемеридах. Текущая Луна: ${data.meta.current_moon}. ${rx}.`;
-                if (currentSign) renderContent();
+                
+                if (data.meta) {
+                    const rx = data.meta.current_mercury_rx ? "️ Меркурий ретроградный" : "✅ Меркурий прямой";
+                    document.getElementById('meta').textContent = `Система работает на реальных эфемеридах. Текущая Луна: ${data.meta.current_moon}. ${rx}.`;
+                } else {
+                    console.error('meta не найдена в данных');
+                }
+                
+                // Если уже выбран знак, отображаем контент
+                if (currentSign) {
+                    console.log('Отображаем данные для знака:', currentSign);
+                    renderContent();
+                } else {
+                    document.getElementById('loadingMsg').textContent = 'Выберите знак зодиака выше';
+                }
             })
             .catch(err => {
                 console.error('Ошибка загрузки:', err);
-                document.getElementById('loadingMsg').textContent = 'Ошибка загрузки данных. Попробуйте обновить страницу через 2 минуты.';
+                document.getElementById('loadingMsg').textContent = 'Ошибка загрузки данных. Откройте консоль (F12) для деталей.';
                 document.getElementById('loadingMsg').className = 'error-msg';
             });
 
         document.querySelectorAll('.sign-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 currentSign = btn.dataset.sign;
+                console.log('Выбран знак:', currentSign);
                 document.querySelectorAll('.sign-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 document.getElementById('horoscopeCard').classList.remove('hidden');
@@ -196,6 +224,7 @@
         document.querySelectorAll('.tab-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 currentTab = btn.dataset.tab;
+                console.log('Выбрана вкладка:', currentTab);
                 document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 renderContent();
@@ -203,29 +232,51 @@
         });
 
         function renderContent() {
-            if (!horoscopeData || !currentSign) {
+            console.log('renderContent вызван. currentSign:', currentSign, 'currentTab:', currentTab);
+            console.log('horoscopeData:', horoscopeData);
+            
+            if (!horoscopeData) {
                 document.getElementById('loadingMsg').textContent = 'Данные еще загружаются...';
                 return;
             }
+            
+            if (!currentSign) {
+                document.getElementById('loadingMsg').textContent = 'Выберите знак зодиака';
+                return;
+            }
 
-            // Проверяем, есть ли данные для этого периода
-            if (!horoscopeData[currentSign] || !horoscopeData[currentSign][currentTab]) {
-                document.getElementById('loadingMsg').textContent = 'Данные для этого периода временно недоступны.';
+            // Проверяем наличие данных
+            const signData = horoscopeData[currentSign];
+            console.log('Данные для знака', currentSign, ':', signData);
+            
+            if (!signData) {
+                document.getElementById('loadingMsg').textContent = 'Данные для знака не найдены. Доступные знаки: ' + Object.keys(horoscopeData).join(', ');
+                document.getElementById('loadingMsg').className = 'error-msg';
+                document.getElementById('contentArea').classList.add('hidden');
+                return;
+            }
+            
+            const periodData = signData[currentTab];
+            console.log('Данные для периода', currentTab, ':', periodData);
+
+            if (!periodData) {
+                document.getElementById('loadingMsg').textContent = 'Данные для периода не найдены. Доступные периоды: ' + Object.keys(signData).join(', ');
                 document.getElementById('loadingMsg').className = 'error-msg';
                 document.getElementById('contentArea').classList.add('hidden');
                 return;
             }
 
-            const data = horoscopeData[currentSign][currentTab];
-            
+            // Всё ок, отображаем
             document.getElementById('loadingMsg').classList.add('hidden');
             document.getElementById('contentArea').classList.remove('hidden');
             
-            document.getElementById('dateRef').textContent = `Ориентировочная дата расчета: ${data.date_ref}`;
-            document.getElementById('astroFact').textContent = `🪐 Астро-факт: ${data.astro_fact}`;
-            document.getElementById('content-focus').textContent = data.focus;
-            document.getElementById('content-do').textContent = data.do;
-            document.getElementById('content-avoid').textContent = data.avoid;
+            document.getElementById('dateRef').textContent = `Ориентировочная дата расчета: ${periodData.date_ref}`;
+            document.getElementById('astroFact').textContent = `🪐 Астро-факт: ${periodData.astro_fact}`;
+            document.getElementById('content-focus').textContent = periodData.focus;
+            document.getElementById('content-do').textContent = periodData.do;
+            document.getElementById('content-avoid').textContent = periodData.avoid;
+            
+            console.log('Данные успешно отображены');
         }
     </script>
 </body>
