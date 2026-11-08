@@ -2,7 +2,13 @@ import json
 from datetime import datetime, timedelta
 from kerykeion import AstrologicalSubjectFactory
 
-# Каноничные трактовки Венеры (любовь, деньги, эстетика)
+# Маппинг сокращений kerykeion в полные названия
+SIGN_MAP = {
+    'Ari': 'Aries', 'Tau': 'Taurus', 'Gem': 'Gemini', 'Can': 'Cancer',
+    'Leo': 'Leo', 'Vir': 'Virgo', 'Lib': 'Libra', 'Sco': 'Scorpio',
+    'Sag': 'Sagittarius', 'Cap': 'Capricorn', 'Aqu': 'Aquarius', 'Pis': 'Pisces'
+}
+
 VENUS_INTERPRETATIONS = {
     'Aries': "Венера в Овне: страсть, импульсивность в чувствах, спонтанные покупки",
     'Taurus': "Венера в Тельце: стабильность в отношениях, любовь к комфорту, удачные финансовые решения",
@@ -18,7 +24,6 @@ VENUS_INTERPRETATIONS = {
     'Pisces': "Венера в Рыбах: романтика, идеализация, сострадание, творчество"
 }
 
-# Каноничные трактовки Марса (действия, энергия, агрессия)
 MARS_INTERPRETATIONS = {
     'Aries': "Марс в Овне: высокая энергия, решительность, лидерство, импульсивность",
     'Taurus': "Марс в Тельце: упорство, методичность, медленные но уверенные действия",
@@ -34,7 +39,6 @@ MARS_INTERPRETATIONS = {
     'Pisces': "Марс в Рыбах: интуиция в действиях, творчество, мягкость"
 }
 
-# Дневные тексты (по знаку Солнца пользователя)
 DAILY_TEXTS = {
     'aries': {
         'focus': ['Инициатива и лидерство', 'Активные действия', 'Запуск новых дел', 'Смелость и решительность', 'Личные амбиции'],
@@ -143,6 +147,10 @@ YEARLY_TEXTS = {
     'pisces': "Год завершения. Фокус на итогах и интуиции."
 }
 
+def normalize_sign(short_sign):
+    """Преобразует сокращение kerykeion в полное название"""
+    return SIGN_MAP.get(short_sign, short_sign)
+
 def get_astro_data(days_offset):
     target_date = datetime.now() + timedelta(days=days_offset)
     subject = AstrologicalSubjectFactory.from_birth_data(
@@ -150,13 +158,13 @@ def get_astro_data(days_offset):
         hour=12, minute=0, lng=37.6173, lat=55.7558, tz_str="Europe/Moscow", online=False
     )
     return {
-        "sun_sign": subject.sun.sign,
-        "moon_sign": subject.moon.sign,
+        "sun_sign": normalize_sign(subject.sun.sign),
+        "moon_sign": normalize_sign(subject.moon.sign),
         "moon_position": subject.moon.position,
-        "mercury_sign": subject.mercury.sign,
+        "mercury_sign": normalize_sign(subject.mercury.sign),
         "mercury_retrograde": subject.mercury.retrograde,
-        "venus_sign": subject.venus.sign,
-        "mars_sign": subject.mars.sign,
+        "venus_sign": normalize_sign(subject.venus.sign),
+        "mars_sign": normalize_sign(subject.mars.sign),
         "date_str": target_date.strftime('%d.%m.%Y')
     }
 
@@ -199,7 +207,6 @@ for sign in SIGNS:
         astro = get_astro_data(days_offset)
         texts = get_text_for_period(sign, period_name)
         
-        # Формируем расширенный астро-факт с 5 планетами
         mercury_status = "ретро ⚠️" if astro["mercury_retrograde"] else "прямой ✅"
         astro_fact = (
             f"☉ Солнце: {astro['sun_sign']} | "
@@ -209,7 +216,6 @@ for sign in SIGNS:
             f"♂ Марс: {astro['mars_sign']}"
         )
         
-        # Добавляем трактовки Венеры и Марса
         venus_text = VENUS_INTERPRETATIONS[astro['venus_sign']]
         mars_text = MARS_INTERPRETATIONS[astro['mars_sign']]
         
