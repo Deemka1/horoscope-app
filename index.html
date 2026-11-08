@@ -2,306 +2,420 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#0a0a0f">
     <title>Астро-факты</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         
+        :root {
+            --bg: #0a0a0f;
+            --bg-card: #13131a;
+            --bg-elevated: #1a1a23;
+            --border: #25252f;
+            --text: #e8e4df;
+            --text-dim: #8a8690;
+            --text-muted: #5a5760;
+            --accent: #c9b8ff;
+            --accent-dim: rgba(201, 184, 255, 0.15);
+            --success: #7dd3a0;
+            --danger: #ff7b8a;
+            --venus: #e891a8;
+            --mars: #ff9b7a;
+        }
+        
+        html, body {
+            height: 100%;
+            overflow: hidden;
+        }
+        
         body { 
             font-family: 'Inter', -apple-system, sans-serif; 
-            background: #000;
-            color: #fff; 
-            min-height: 100vh;
-            padding: 20px;
+            background: var(--bg);
+            color: var(--text);
+            font-size: 15px;
+            line-height: 1.5;
+            font-weight: 300;
+            -webkit-font-smoothing: antialiased;
         }
         
-        .container { 
-            max-width: 600px; 
-            margin: 0 auto;
+        /* Главный контейнер с отступом под нижнюю панель */
+        .app {
+            height: 100vh;
+            height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            padding-bottom: env(safe-area-inset-bottom);
         }
         
-        h1 { 
-            font-size: 2rem; 
-            margin-bottom: 8px; 
-            text-align: center; 
-            font-weight: 300; 
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 24px 20px 20px;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .content::-webkit-scrollbar { display: none; }
+        
+        /* Экраны */
+        .screen { display: none; animation: fadeIn 0.3s ease; }
+        .screen.active { display: block; }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Заголовки */
+        .screen-header {
+            margin-bottom: 28px;
+            padding-top: 8px;
+        }
+        
+        .screen-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2.2rem;
+            font-weight: 300;
             letter-spacing: -0.5px;
+            line-height: 1.1;
+            margin-bottom: 6px;
         }
         
-        .subtitle {
-            text-align: center;
+        .screen-subtitle {
             font-size: 0.85rem;
-            color: rgba(255, 255, 255, 0.5);
-            margin-bottom: 30px;
+            color: var(--text-dim);
             font-weight: 300;
         }
         
-        .sign-grid { 
-            display: grid; 
-            grid-template-columns: repeat(3, 1fr); 
-            gap: 8px; 
-            margin-bottom: 25px; 
+        /* Сетка знаков */
+        .signs-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 24px;
         }
         
-        .sign-btn { 
-            background: #111;
-            border: 1px solid #222;
-            color: #fff; 
-            padding: 14px 8px; 
-            border-radius: 8px; 
-            cursor: pointer; 
-            transition: all 0.2s; 
+        .sign-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 16px 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .sign-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+            opacity: 0;
+            transition: opacity 0.25s;
+        }
+        
+        .sign-card:hover {
+            background: var(--bg-elevated);
+            border-color: #35354a;
+            transform: translateY(-2px);
+        }
+        
+        .sign-card.active {
+            background: var(--accent-dim);
+            border-color: var(--accent);
+        }
+        
+        .sign-card.active::before { opacity: 1; }
+        
+        .sign-name {
             font-size: 0.9rem;
             font-weight: 400;
+            letter-spacing: 0.3px;
         }
         
-        .sign-btn:hover { 
-            background: #1a1a1a;
-            border-color: #444;
-        }
-        
-        .sign-btn.active { 
-            background: #fff;
-            color: #000;
-            border-color: #fff;
+        .sign-card.active .sign-name {
+            color: var(--accent);
             font-weight: 500;
         }
         
-        .horoscope-card { 
-            background: #111;
-            border: 1px solid #222;
-            border-radius: 12px; 
-            padding: 20px; 
-            margin-bottom: 25px;
+        /* Сегментированный переключатель */
+        .segmented {
+            display: flex;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 4px;
+            margin-bottom: 24px;
         }
         
-        /* Вкладки в две строки */
-        .tabs-container { 
-            margin-bottom: 20px;
-            border-bottom: 1px solid #222;
-            padding-bottom: 12px;
-        }
-        
-        .tabs { 
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 6px;
-        }
-        
-        .tab-btn { 
+        .segment {
+            flex: 1;
             background: transparent;
-            border: 1px solid #333;
-            color: rgba(255, 255, 255, 0.5); 
-            padding: 8px 4px; 
-            cursor: pointer; 
-            font-size: 0.75rem; 
-            border-radius: 6px;
-            transition: all 0.2s;
+            border: none;
+            color: var(--text-dim);
+            padding: 10px 4px;
+            font-size: 0.8rem;
             font-weight: 400;
-            text-align: center;
+            cursor: pointer;
+            border-radius: 7px;
+            transition: all 0.25s;
+            font-family: inherit;
         }
         
-        .tab-btn:hover { 
-            color: #fff;
-            border-color: #555;
-        }
-        
-        .tab-btn.active { 
-            background: #fff;
-            color: #000;
-            border-color: #fff;
+        .segment.active {
+            background: var(--bg-elevated);
+            color: var(--text);
             font-weight: 500;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
         }
         
-        .section { margin-bottom: 20px; }
-        
-        .section-title { 
-            font-size: 0.7rem; 
-            text-transform: uppercase; 
-            color: rgba(255, 255, 255, 0.4);
-            margin-bottom: 8px; 
-            letter-spacing: 1px;
-            font-weight: 500;
+        /* Карточка прогноза */
+        .forecast-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 22px;
+            margin-bottom: 16px;
         }
         
-        .section-content { 
-            font-size: 1rem; 
-            line-height: 1.5; 
-            color: rgba(255, 255, 255, 0.9);
-            font-weight: 300;
+        .forecast-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid var(--border);
         }
         
-        .astro-fact { 
-            background: #0a0a0a;
-            border: 1px solid #222;
-            padding: 12px; 
-            margin-bottom: 15px; 
-            border-radius: 8px; 
-            font-size: 0.8rem; 
-            color: rgba(255, 255, 255, 0.7);
+        .forecast-date {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+        }
+        
+        .forecast-astro {
+            font-size: 0.75rem;
+            color: var(--text-dim);
             font-family: 'SF Mono', 'Monaco', monospace;
             letter-spacing: 0.3px;
         }
         
-        .planet-card { 
-            background: #0a0a0a;
-            border-left: 2px solid #4CAF50;
-            padding: 12px; 
-            margin-bottom: 8px; 
-            border-radius: 0 8px 8px 0; 
-            font-size: 0.85rem; 
-            color: rgba(255, 255, 255, 0.8);
+        .forecast-section {
+            margin-bottom: 18px;
         }
         
-        .planet-card.venus { border-left-color: #E91E63; }
-        .planet-card.mars { border-left-color: #FF5722; }
+        .forecast-section:last-child { margin-bottom: 0; }
         
-        .date-ref { 
-            font-size: 0.75rem; 
-            color: rgba(255, 255, 255, 0.3);
-            text-align: right; 
-            margin-bottom: 15px; 
+        .forecast-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            letter-spacing: 1.5px;
+            margin-bottom: 8px;
+            font-weight: 500;
         }
         
-        .meta { 
-            font-size: 0.7rem; 
-            color: rgba(255, 255, 255, 0.3);
-            text-align: center; 
-            margin-top: 20px; 
-            padding-top: 15px; 
-            border-top: 1px solid #222;
-        }
-        
-        .hidden { display: none; }
-        
-        /* Секция асцендента */
-        .ascendant-section { 
-            margin-top: 30px; 
-            padding-top: 25px; 
-            border-top: 1px solid #222;
-        }
-        
-        .ascendant-section h2 { 
-            font-size: 1.5rem; 
-            margin-bottom: 20px; 
-            text-align: center; 
+        .forecast-text {
+            font-size: 1rem;
+            line-height: 1.55;
+            color: var(--text);
             font-weight: 300;
         }
         
-        .form-group { margin-bottom: 15px; }
-        
-        .form-group label { 
-            display: block; 
-            font-size: 0.75rem; 
-            color: rgba(255, 255, 255, 0.5);
-            margin-bottom: 6px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            font-weight: 500;
-        }
-        
-        .form-group input, .form-group select { 
-            width: 100%; 
-            background: #111;
-            border: 1px solid #222;
-            color: #fff; 
-            padding: 12px; 
-            border-radius: 8px; 
-            font-size: 0.95rem;
-            transition: border-color 0.2s;
-        }
-        
-        .form-group input:focus, .form-group select:focus { 
-            outline: none; 
-            border-color: #fff;
-        }
-        
-        .form-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-        
-        .calc-btn { 
-            width: 100%; 
-            background: #fff;
-            color: #000; 
-            border: none; 
-            padding: 14px; 
-            border-radius: 8px; 
-            font-size: 0.95rem; 
-            cursor: pointer; 
-            margin-top: 12px; 
-            transition: all 0.2s;
-            font-weight: 500;
-        }
-        
-        .calc-btn:hover { 
-            background: #e0e0e0;
-        }
-        
-        .calc-btn:disabled { 
-            background: #333;
-            color: #666;
-            cursor: not-allowed;
-        }
-        
-        .ascendant-result { 
-            background: #111;
-            border: 1px solid #222;
-            border-radius: 12px; 
-            padding: 20px; 
-            margin-top: 15px;
-        }
-        
-        .ascendant-result h3 { 
-            font-size: 1.2rem; 
-            margin-bottom: 12px; 
-            font-weight: 400;
-        }
-        
-        .ascendant-result p { 
-            font-size: 0.9rem; 
-            line-height: 1.5; 
-            color: rgba(255, 255, 255, 0.8);
+        .planet-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 14px;
+            background: var(--bg-elevated);
+            border-radius: 10px;
             margin-bottom: 8px;
+            border-left: 2px solid var(--accent);
         }
         
-        .error-msg { 
-            color: #ff4444; 
-            text-align: center; 
-            padding: 12px;
+        .planet-row.venus { border-left-color: var(--venus); }
+        .planet-row.mars { border-left-color: var(--mars); }
+        
+        .planet-symbol {
+            font-size: 1.1rem;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+        
+        .planet-text {
+            font-size: 0.88rem;
+            line-height: 1.5;
+            color: var(--text);
+        }
+        
+        /* Пустое состояние */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+        }
+        
+        .empty-state-icon {
+            font-size: 2.5rem;
+            margin-bottom: 12px;
+            opacity: 0.4;
+        }
+        
+        .empty-state-text {
             font-size: 0.9rem;
+            font-weight: 300;
+        }
+        
+        /* Форма асцендента */
+        .form-group { margin-bottom: 16px; }
+        
+        .form-label { 
+            display: block; 
+            font-size: 0.7rem; 
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 500;
+        }
+        
+        .form-input, .form-select { 
+            width: 100%; 
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text); 
+            padding: 14px 16px; 
+            border-radius: 10px; 
+            font-size: 0.95rem;
+            font-family: inherit;
+            transition: border-color 0.2s;
+            -webkit-appearance: none;
+        }
+        
+        .form-input:focus, .form-select:focus { 
+            outline: none; 
+            border-color: var(--accent);
+        }
+        
+        .form-row { 
+            display: grid; 
+            grid-template-columns: repeat(3, 1fr); 
+            gap: 10px; 
         }
         
         .time-toggle { 
             display: flex; 
             align-items: center; 
-            gap: 10px; 
-            margin-bottom: 15px; 
-            padding: 12px; 
-            background: #111;
-            border-radius: 8px; 
-            border: 1px solid #222;
+            gap: 12px; 
+            margin: 18px 0; 
+            padding: 14px; 
+            background: var(--bg-card);
+            border-radius: 10px; 
+            border: 1px solid var(--border);
         }
         
         .time-toggle input[type="checkbox"] { 
             width: 18px; 
             height: 18px; 
             cursor: pointer;
+            accent-color: var(--accent);
         }
         
         .time-toggle label { 
-            font-size: 0.85rem; 
-            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.88rem; 
+            color: var(--text-dim);
             cursor: pointer; 
             margin: 0;
+            line-height: 1.4;
+        }
+        
+        .primary-btn { 
+            width: 100%; 
+            background: var(--text);
+            color: var(--bg); 
+            border: none; 
+            padding: 16px; 
+            border-radius: 12px; 
+            font-size: 0.95rem; 
+            cursor: pointer; 
+            margin-top: 8px; 
+            transition: all 0.2s;
+            font-weight: 500;
+            font-family: inherit;
+            letter-spacing: 0.3px;
+        }
+        
+        .primary-btn:hover { opacity: 0.9; }
+        
+        .primary-btn:disabled { 
+            background: var(--bg-elevated);
+            color: var(--text-muted);
+            cursor: not-allowed;
+        }
+        
+        .result-card { 
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px; 
+            padding: 22px; 
+            margin-top: 20px;
+        }
+        
+        .result-title { 
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.5rem; 
+            margin-bottom: 14px; 
+            font-weight: 400;
+            color: var(--accent);
+        }
+        
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.88rem;
+        }
+        
+        .result-row:last-of-type { border-bottom: none; }
+        
+        .result-label { color: var(--text-muted); }
+        .result-value { color: var(--text); font-weight: 400; }
+        
+        .result-interpretation {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+            font-size: 0.92rem;
+            line-height: 1.55;
+            color: var(--text-dim);
+            font-style: italic;
+        }
+        
+        .error-msg { 
+            color: var(--danger); 
+            text-align: center; 
+            padding: 14px;
+            font-size: 0.88rem;
+            background: rgba(255, 123, 138, 0.08);
+            border-radius: 10px;
+            margin-top: 16px;
         }
         
         .consent-block { 
-            background: #111;
-            border: 1px solid #222;
-            border-radius: 8px; 
-            padding: 12px; 
-            margin: 15px 0; 
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px; 
+            padding: 14px; 
+            margin: 16px 0; 
             display: flex; 
             align-items: flex-start; 
             gap: 10px;
@@ -311,197 +425,396 @@
             width: 18px; 
             height: 18px; 
             cursor: pointer;
+            accent-color: var(--accent);
             margin-top: 2px;
+            flex-shrink: 0;
         }
         
         .consent-block label { 
-            font-size: 0.8rem; 
-            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.82rem; 
+            color: var(--text-dim);
             cursor: pointer; 
-            line-height: 1.4;
+            line-height: 1.45;
         }
         
         .consent-block a { 
-            color: #fff;
-            text-decoration: underline;
+            color: var(--accent);
+            text-decoration: none;
         }
         
-        .disclaimer { 
-            font-size: 0.7rem; 
-            color: rgba(255, 255, 255, 0.3);
-            text-align: center; 
-            margin-top: 25px; 
-            padding: 15px; 
-            border-top: 1px solid #222;
-            line-height: 1.4;
+        /* О сервисе */
+        .about-section {
+            margin-bottom: 24px;
+        }
+        
+        .about-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.4rem;
+            font-weight: 400;
+            margin-bottom: 12px;
+            color: var(--text);
+        }
+        
+        .about-text {
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: var(--text-dim);
+            margin-bottom: 10px;
+        }
+        
+        .about-text strong {
+            color: var(--text);
+            font-weight: 500;
+        }
+        
+        .about-link {
+            color: var(--accent);
+            text-decoration: none;
+        }
+        
+        .disclaimer-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+            margin-top: 20px;
+        }
+        
+        /* Нижняя навигация */
+        .tab-bar {
+            display: flex;
+            background: rgba(10, 10, 15, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid var(--border);
+            padding: 8px 0 calc(8px + env(safe-area-inset-bottom));
+            position: sticky;
+            bottom: 0;
+            z-index: 100;
+        }
+        
+        .tab-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 8px 4px;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: color 0.2s;
+            font-family: inherit;
+        }
+        
+        .tab-item.active { color: var(--accent); }
+        
+        .tab-icon {
+            font-size: 1.3rem;
+            line-height: 1;
+        }
+        
+        .tab-label {
+            font-size: 0.65rem;
+            font-weight: 400;
+            letter-spacing: 0.3px;
+        }
+        
+        .tab-item.active .tab-label {
+            font-weight: 500;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Астро-факты</h1>
-        <div class="subtitle">Персональные астрологические расчеты</div>
-        
-        <div class="sign-grid">
-            <button class="sign-btn" data-sign="aries">Овен</button>
-            <button class="sign-btn" data-sign="taurus">Телец</button>
-            <button class="sign-btn" data-sign="gemini">Близнецы</button>
-            <button class="sign-btn" data-sign="cancer">Рак</button>
-            <button class="sign-btn" data-sign="leo">Лев</button>
-            <button class="sign-btn" data-sign="virgo">Дева</button>
-            <button class="sign-btn" data-sign="libra">Весы</button>
-            <button class="sign-btn" data-sign="scorpio">Скорпион</button>
-            <button class="sign-btn" data-sign="sagittarius">Стрелец</button>
-            <button class="sign-btn" data-sign="capricorn">Козерог</button>
-            <button class="sign-btn" data-sign="aquarius">Водолей</button>
-            <button class="sign-btn" data-sign="pisces">Рыбы</button>
-        </div>
-
-        <div id="horoscopeCard" class="horoscope-card hidden">
-            <div class="tabs-container">
-                <div class="tabs">
-                    <button class="tab-btn active" data-tab="today">Сегодня</button>
-                    <button class="tab-btn" data-tab="tomorrow">Завтра</button>
-                    <button class="tab-btn" data-tab="this_week">Неделя</button>
-                    <button class="tab-btn" data-tab="next_week">След. нед.</button>
-                    <button class="tab-btn" data-tab="this_month">Месяц</button>
-                    <button class="tab-btn" data-tab="next_month">След. мес.</button>
-                    <button class="tab-btn" data-tab="this_year">Год</button>
+    <div class="app">
+        <div class="content">
+            
+            <!-- ЭКРАН 1: ГОРОСКОП -->
+            <div class="screen active" id="screen-horoscope">
+                <div class="screen-header">
+                    <h1 class="screen-title">Гороскоп</h1>
+                    <p class="screen-subtitle">Выберите ваш знак зодиака</p>
                 </div>
-            </div>
-
-            <div id="loadingMsg" style="text-align: center; color: rgba(255,255,255,0.3); padding: 30px;">Выберите знак зодиака</div>
-            <div id="contentArea" class="hidden">
-                <div class="date-ref" id="dateRef"></div>
-                <div class="astro-fact" id="astroFact"></div>
-                <div class="planet-card venus" id="venusCard"></div>
-                <div class="planet-card mars" id="marsCard"></div>
-                <div class="section"><div class="section-title">Фокус периода</div><div class="section-content" id="content-focus"></div></div>
-                <div class="section"><div class="section-title">Рекомендуется</div><div class="section-content" id="content-do"></div></div>
-                <div class="section"><div class="section-title">Категорически избегать</div><div class="section-content" id="content-avoid"></div></div>
-            </div>
-            <div class="meta" id="meta"></div>
-        </div>
-
-        <div class="ascendant-section">
-            <h2>Рассчитать Асцендент</h2>
-            <div class="form-group">
-                <label>Город рождения</label>
-                <input type="text" id="cityInput" placeholder="Например: Москва" value="Москва">
-            </div>
-            <div class="form-row">
-                <div class="form-group"><label>День</label><input type="number" id="dayInput" min="1" max="31" value="15"></div>
-                <div class="form-group"><label>Месяц</label><input type="number" id="monthInput" min="1" max="12" value="5"></div>
-                <div class="form-group"><label>Год</label><input type="number" id="yearInput" min="1900" max="2030" value="1990"></div>
+                
+                <div class="signs-grid" id="signsGrid">
+                    <button class="sign-card" data-sign="aries"><span class="sign-name">Овен</span></button>
+                    <button class="sign-card" data-sign="taurus"><span class="sign-name">Телец</span></button>
+                    <button class="sign-card" data-sign="gemini"><span class="sign-name">Близнецы</span></button>
+                    <button class="sign-card" data-sign="cancer"><span class="sign-name">Рак</span></button>
+                    <button class="sign-card" data-sign="leo"><span class="sign-name">Лев</span></button>
+                    <button class="sign-card" data-sign="virgo"><span class="sign-name">Дева</span></button>
+                    <button class="sign-card" data-sign="libra"><span class="sign-name">Весы</span></button>
+                    <button class="sign-card" data-sign="scorpio"><span class="sign-name">Скорпион</span></button>
+                    <button class="sign-card" data-sign="sagittarius"><span class="sign-name">Стрелец</span></button>
+                    <button class="sign-card" data-sign="capricorn"><span class="sign-name">Козерог</span></button>
+                    <button class="sign-card" data-sign="aquarius"><span class="sign-name">Водолей</span></button>
+                    <button class="sign-card" data-sign="pisces"><span class="sign-name">Рыбы</span></button>
+                </div>
+                
+                <div id="forecastContainer"></div>
             </div>
             
-            <div class="time-toggle">
-                <input type="checkbox" id="approximateTime" onchange="toggleTimeInput()">
-                <label for="approximateTime">Не помню точное время, выбрать примерное</label>
-            </div>
-
-            <div id="exactTimeBlock">
-                <div class="form-row">
-                    <div class="form-group"><label>Часы</label><input type="number" id="hourInput" min="0" max="23" value="14"></div>
-                    <div class="form-group"><label>Минуты</label><input type="number" id="minuteInput" min="0" max="59" value="30"></div>
-                    <div class="form-group"><label>&nbsp;</label><div style="height: 42px;"></div></div>
+            <!-- ЭКРАН 2: АСЦЕНДЕНТ -->
+            <div class="screen" id="screen-ascendant">
+                <div class="screen-header">
+                    <h1 class="screen-title">Асцендент</h1>
+                    <p class="screen-subtitle">Ваша восходящая карта</p>
                 </div>
-            </div>
-
-            <div id="approximateTimeBlock" class="hidden">
+                
                 <div class="form-group">
-                    <label>Примерное время рождения</label>
-                    <select id="timeOfDay">
-                        <option value="09:00">Утро (06:00 - 11:59)</option>
-                        <option value="15:00" selected>День (12:00 - 17:59)</option>
-                        <option value="21:00">Вечер (18:00 - 23:59)</option>
-                        <option value="03:00">Ночь (00:00 - 05:59)</option>
-                    </select>
+                    <label class="form-label">Город рождения</label>
+                    <input type="text" class="form-input" id="cityInput" placeholder="Москва" value="Москва">
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">День</label>
+                        <input type="number" class="form-input" id="dayInput" min="1" max="31" value="15">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Месяц</label>
+                        <input type="number" class="form-input" id="monthInput" min="1" max="12" value="5">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Год</label>
+                        <input type="number" class="form-input" id="yearInput" min="1900" max="2030" value="1990">
+                    </div>
+                </div>
+                
+                <div class="time-toggle">
+                    <input type="checkbox" id="approximateTime" onchange="toggleTimeInput()">
+                    <label for="approximateTime">Не помню точное время</label>
+                </div>
+                
+                <div id="exactTimeBlock">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Часы</label>
+                            <input type="number" class="form-input" id="hourInput" min="0" max="23" value="14">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Минуты</label>
+                            <input type="number" class="form-input" id="minuteInput" min="0" max="59" value="30">
+                        </div>
+                        <div class="form-group"></div>
+                    </div>
+                </div>
+                
+                <div id="approximateTimeBlock" class="hidden">
+                    <div class="form-group">
+                        <label class="form-label">Примерное время</label>
+                        <select class="form-select" id="timeOfDay">
+                            <option value="09:00">Утро (06–12)</option>
+                            <option value="15:00" selected>День (12–18)</option>
+                            <option value="21:00">Вечер (18–00)</option>
+                            <option value="03:00">Ночь (00–06)</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="consent-block">
+                    <input type="checkbox" id="consentCheckbox">
+                    <label for="consentCheckbox">
+                        Согласен на обработку данных для расчёта. Данные не хранятся. <a href="privacy.html" target="_blank">Политика</a>
+                    </label>
+                </div>
+                
+                <button class="primary-btn" id="calcBtn" onclick="calculateAscendant()">Рассчитать</button>
+                <div id="ascendantResult"></div>
+            </div>
+            
+            <!-- ЭКРАН 3: О СЕРВИСЕ -->
+            <div class="screen" id="screen-about">
+                <div class="screen-header">
+                    <h1 class="screen-title">О сервисе</h1>
+                    <p class="screen-subtitle">Как это работает</p>
+                </div>
+                
+                <div class="about-section">
+                    <h2 class="about-title">Астрономическая основа</h2>
+                    <p class="about-text">
+                        Все расчёты выполняются на основе реальных эфемерид — математических моделей движения планет. 
+                        Мы используем библиотеку <strong>Kerykeion</strong> и открытый сервис геокодинга <strong>Nominatim</strong>.
+                    </p>
+                </div>
+                
+                <div class="about-section">
+                    <h2 class="about-title">Что мы считаем</h2>
+                    <p class="about-text">
+                        • Положение Солнца, Луны, Меркурия, Венеры и Марса<br>
+                        • Статус Меркурия (прямой или ретроградный)<br>
+                        • Асцендент по вашему месту и времени рождения
+                    </p>
+                </div>
+                
+                <div class="about-section">
+                    <h2 class="about-title">Конфиденциальность</h2>
+                    <p class="about-text">
+                        Мы <strong>не сохраняем</strong> ваши данные. Город, дата и время рождения используются только в момент расчёта 
+                        и сразу удаляются из памяти сервера.
+                    </p>
+                    <p class="about-text">
+                        <a href="privacy.html" target="_blank" class="about-link">Полная политика конфиденциальности →</a>
+                    </p>
+                </div>
+                
+                <div class="disclaimer-box">
+                    Сервис носит исключительно развлекательный характер. Астрологические расчёты не являются научно доказанными фактами 
+                    и не могут служить основанием для принятия важных жизненных, финансовых или медицинских решений.
                 </div>
             </div>
-
-            <div class="consent-block">
-                <input type="checkbox" id="consentCheckbox">
-                <label for="consentCheckbox">
-                    Я согласен на обработку персональных данных. Данные не хранятся. <a href="privacy.html" target="_blank">Политика</a>
-                </label>
-            </div>
-
-            <button class="calc-btn" id="calcBtn" onclick="calculateAscendant()">Рассчитать</button>
-            <div id="ascendantResult" class="hidden"></div>
+            
         </div>
-
-        <div class="disclaimer">
-            Сервис носит развлекательный характер. Астрологические расчеты не являются научно доказанными фактами.
-        </div>
+        
+        <!-- НИЖНЯЯ НАВИГАЦИЯ -->
+        <nav class="tab-bar">
+            <button class="tab-item active" data-screen="horoscope">
+                <span class="tab-icon">✦</span>
+                <span class="tab-label">Гороскоп</span>
+            </button>
+            <button class="tab-item" data-screen="ascendant">
+                <span class="tab-icon">◐</span>
+                <span class="tab-label">Асцендент</span>
+            </button>
+            <button class="tab-item" data-screen="about">
+                <span class="tab-icon">◌</span>
+                <span class="tab-label">О сервисе</span>
+            </button>
+        </nav>
     </div>
 
     <script>
-        // Кэш-бастер для Telegram
-        const VERSION = '2026.11.09.1';
-        
+        const VERSION = '2026.11.09.2';
         let horoscopeData = null;
         let currentSign = null;
-        let currentTab = 'today';
+        let currentPeriod = 'today';
 
-        fetch('horoscope.json?v=' + VERSION).then(r => r.json()).then(data => { 
-            horoscopeData = data; 
-            const rx = data.meta.current_mercury_rx ? "⚠️ Меркурий ретроградный" : "✅ Меркурий прямой";
-            document.getElementById('meta').textContent = `Луна: ${data.meta.current_moon}. ${rx}.`;
-        }).catch(err => console.error('Ошибка:', err));
+        // Загрузка данных
+        fetch('horoscope.json?v=' + VERSION)
+            .then(r => r.json())
+            .then(data => { horoscopeData = data; })
+            .catch(err => console.error('Ошибка загрузки:', err));
 
-        document.querySelectorAll('.sign-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                currentSign = btn.dataset.sign;
-                document.querySelectorAll('.sign-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                document.getElementById('horoscopeCard').classList.remove('hidden');
-                renderContent();
+        // Навигация между экранами
+        document.querySelectorAll('.tab-item').forEach(tab => {
+            tab.addEventListener('click', () => {
+                const screenId = tab.dataset.screen;
+                document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+                document.getElementById('screen-' + screenId).classList.add('active');
+                document.querySelector('.content').scrollTop = 0;
             });
         });
 
-        document.querySelectorAll('.tab-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                currentTab = btn.dataset.tab;
-                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                renderContent();
+        // Выбор знака
+        document.querySelectorAll('.sign-card').forEach(card => {
+            card.addEventListener('click', () => {
+                document.querySelectorAll('.sign-card').forEach(c => c.classList.remove('active'));
+                card.classList.add('active');
+                currentSign = card.dataset.sign;
+                renderForecast();
             });
         });
 
-        function renderContent() {
-            if (!horoscopeData || !currentSign) return;
-            const data = horoscopeData[currentSign][currentTab];
-            if (!data) return;
-            document.getElementById('loadingMsg').classList.add('hidden');
-            document.getElementById('contentArea').classList.remove('hidden');
-            document.getElementById('dateRef').textContent = `Дата: ${data.date_ref}`;
-            document.getElementById('astroFact').textContent = data.astro_fact;
-            document.getElementById('venusCard').textContent = `♀ Венера: ${data.venus}`;
-            document.getElementById('marsCard').textContent = `♂ Марс: ${data.mars}`;
-            document.getElementById('content-focus').textContent = data.focus;
-            document.getElementById('content-do').textContent = data.do;
-            document.getElementById('content-avoid').textContent = data.avoid;
+        // Сегментированный переключатель периодов
+        function getPeriodButtons() {
+            return [
+                { id: 'today', label: 'День' },
+                { id: 'this_week', label: 'Неделя' },
+                { id: 'this_month', label: 'Месяц' },
+                { id: 'this_year', label: 'Год' }
+            ];
         }
 
+        function renderForecast() {
+            const container = document.getElementById('forecastContainer');
+            
+            if (!currentSign) {
+                container.innerHTML = '';
+                return;
+            }
+            
+            if (!horoscopeData) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-state-text">Загрузка данных...</div></div>';
+                return;
+            }
+            
+            const periods = getPeriodButtons();
+            
+            let html = '<div class="segmented">';
+            periods.forEach(p => {
+                const active = p.id === currentPeriod ? 'active' : '';
+                html += `<button class="segment ${active}" data-period="${p.id}">${p.label}</button>`;
+            });
+            html += '</div>';
+            
+            const data = horoscopeData[currentSign][currentPeriod];
+            if (data) {
+                const signNames = {
+                    'aries': 'Овен', 'taurus': 'Телец', 'gemini': 'Близнецы', 'cancer': 'Рак',
+                    'leo': 'Лев', 'virgo': 'Дева', 'libra': 'Весы', 'scorpio': 'Скорпион',
+                    'sagittarius': 'Стрелец', 'capricorn': 'Козерог', 'aquarius': 'Водолей', 'pisces': 'Рыбы'
+                };
+                
+                html += `
+                    <div class="forecast-card">
+                        <div class="forecast-meta">
+                            <span class="forecast-date">${signNames[currentSign]} · ${data.date_ref}</span>
+                            <span class="forecast-astro">${data.astro_fact}</span>
+                        </div>
+                        
+                        <div class="planet-row venus">
+                            <span class="planet-symbol">♀</span>
+                            <span class="planet-text">${data.venus}</span>
+                        </div>
+                        <div class="planet-row mars">
+                            <span class="planet-symbol">♂</span>
+                            <span class="planet-text">${data.mars}</span>
+                        </div>
+                        
+                        <div class="forecast-section" style="margin-top: 18px;">
+                            <div class="forecast-label">Фокус</div>
+                            <div class="forecast-text">${data.focus}</div>
+                        </div>
+                        <div class="forecast-section">
+                            <div class="forecast-label">Рекомендуется</div>
+                            <div class="forecast-text">${data.do}</div>
+                        </div>
+                        <div class="forecast-section">
+                            <div class="forecast-label">Избегать</div>
+                            <div class="forecast-text">${data.avoid}</div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            container.innerHTML = html;
+            
+            // Навешиваем обработчики на сегменты
+            container.querySelectorAll('.segment').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    currentPeriod = btn.dataset.period;
+                    renderForecast();
+                });
+            });
+        }
+
+        // Переключение времени
         function toggleTimeInput() {
             const isApproximate = document.getElementById('approximateTime').checked;
-            const exactBlock = document.getElementById('exactTimeBlock');
-            const approxBlock = document.getElementById('approximateTimeBlock');
-            
-            if (isApproximate) {
-                exactBlock.classList.add('hidden');
-                approxBlock.classList.remove('hidden');
-            } else {
-                exactBlock.classList.remove('hidden');
-                approxBlock.classList.add('hidden');
-            }
+            document.getElementById('exactTimeBlock').classList.toggle('hidden', isApproximate);
+            document.getElementById('approximateTimeBlock').classList.toggle('hidden', !isApproximate);
         }
 
+        // Расчёт асцендента
         async function calculateAscendant() {
-            const consentChecked = document.getElementById('consentCheckbox').checked;
-            if (!consentChecked) {
-                showAscendantError('Поставьте галочку согласия');
+            if (!document.getElementById('consentCheckbox').checked) {
+                showAscendantError('Подтвердите согласие на обработку данных');
                 return;
             }
 
@@ -512,17 +825,15 @@
             const isApproximate = document.getElementById('approximateTime').checked;
             
             let hour, minute;
-            
             if (isApproximate) {
-                const timeString = document.getElementById('timeOfDay').value;
-                [hour, minute] = timeString.split(':');
+                [hour, minute] = document.getElementById('timeOfDay').value.split(':');
             } else {
                 hour = document.getElementById('hourInput').value;
                 minute = document.getElementById('minuteInput').value;
             }
 
             if (!city || !day || !month || !year) {
-                showAscendantError('Заполните город и дату');
+                showAscendantError('Заполните все поля');
                 return;
             }
 
@@ -531,34 +842,39 @@
             
             btn.disabled = true;
             btn.textContent = 'Считаем...';
-            resultDiv.classList.add('hidden');
+            resultDiv.innerHTML = '';
 
             try {
                 const url = `https://astro-calc.fit-for.workers.dev/?city=${encodeURIComponent(city)}&year=${year}&month=${month}&day=${day}&hour=${hour}&minute=${minute}&v=${VERSION}`;
-                
                 const response = await fetch(url);
-                if (!response.ok) throw new Error('Ошибка сети: ' + response.status);
-                
+                if (!response.ok) throw new Error('Ошибка сети');
                 const data = await response.json();
 
                 if (data.error) {
                     showAscendantError(data.error);
                 } else {
-                    const timeLabel = isApproximate ? '(примерно)' : '';
+                    const timeLabel = isApproximate ? ' (примерно)' : '';
                     resultDiv.innerHTML = `
-                        <div class="ascendant-result">
-                            <h3>Асцендент в знаке ${data.ascendant.sign}</h3>
-                            <p><strong>Градус:</strong> ${data.ascendant.degree_in_sign}</p>
-                            <p><strong>Время:</strong> ${hour}:${minute} ${timeLabel}</p>
-                            <p><strong>Город:</strong> ${data.city}</p>
-                            <p style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #222; font-style: italic; color: rgba(255,255,255,0.7);">${data.interpretation}</p>
+                        <div class="result-card">
+                            <h3 class="result-title">Асцендент в знаке ${data.ascendant.sign}</h3>
+                            <div class="result-row">
+                                <span class="result-label">Градус</span>
+                                <span class="result-value">${data.ascendant.degree_in_sign}</span>
+                            </div>
+                            <div class="result-row">
+                                <span class="result-label">Время</span>
+                                <span class="result-value">${hour}:${minute}${timeLabel}</span>
+                            </div>
+                            <div class="result-row">
+                                <span class="result-label">Город</span>
+                                <span class="result-value">${data.city.split(',')[0]}</span>
+                            </div>
+                            <div class="result-interpretation">${data.interpretation}</div>
                         </div>
                     `;
-                    resultDiv.classList.remove('hidden');
                 }
             } catch (error) {
-                console.error('Ошибка:', error);
-                showAscendantError('Ошибка соединения');
+                showAscendantError('Ошибка соединения. Попробуйте позже.');
             } finally {
                 btn.disabled = false;
                 btn.textContent = 'Рассчитать';
@@ -566,9 +882,7 @@
         }
 
         function showAscendantError(message) {
-            const resultDiv = document.getElementById('ascendantResult');
-            resultDiv.innerHTML = `<div class="error-msg">${message}</div>`;
-            resultDiv.classList.remove('hidden');
+            document.getElementById('ascendantResult').innerHTML = `<div class="error-msg">${message}</div>`;
         }
     </script>
 </body>
