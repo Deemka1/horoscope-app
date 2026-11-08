@@ -29,6 +29,22 @@
         .date-ref { font-size: 0.8rem; color: #666; text-align: right; margin-bottom: 15px; font-style: italic; }
         .meta { font-size: 0.75rem; color: #555; text-align: center; margin-top: 25px; padding-top: 15px; border-top: 1px solid #222; }
         .hidden { display: none; }
+        
+        /* Стили для формы асцендента */
+        .ascendant-section { margin-top: 30px; padding-top: 20px; border-top: 1px solid #333; }
+        .ascendant-section h2 { font-size: 1.3rem; margin-bottom: 15px; text-align: center; font-weight: 400; }
+        .form-group { margin-bottom: 12px; }
+        .form-group label { display: block; font-size: 0.85rem; color: #888; margin-bottom: 5px; }
+        .form-group input { width: 100%; background: #1a1a1a; border: 1px solid #333; color: #fff; padding: 10px; border-radius: 6px; font-size: 0.9rem; }
+        .form-group input:focus { outline: none; border-color: #4CAF50; }
+        .form-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .calc-btn { width: 100%; background: #4CAF50; color: #fff; border: none; padding: 12px; border-radius: 6px; font-size: 1rem; cursor: pointer; margin-top: 10px; transition: background 0.2s; }
+        .calc-btn:hover { background: #45a049; }
+        .calc-btn:disabled { background: #555; cursor: not-allowed; }
+        .ascendant-result { background: #1a1a1a; border: 1px solid #4CAF50; border-radius: 8px; padding: 15px; margin-top: 15px; }
+        .ascendant-result h3 { font-size: 1.1rem; margin-bottom: 10px; color: #4CAF50; }
+        .ascendant-result p { font-size: 0.95rem; line-height: 1.5; color: #ccc; margin-bottom: 8px; }
+        .error-msg { color: #ff6b6b; text-align: center; padding: 10px; }
     </style>
 </head>
 <body>
@@ -76,6 +92,44 @@
             </div>
 
             <div class="meta" id="meta"></div>
+        </div>
+
+        <!-- Форма расчета асцендента -->
+        <div class="ascendant-section">
+            <h2>🔮 Рассчитать Асцендент</h2>
+            <div class="form-group">
+                <label>Город рождения</label>
+                <input type="text" id="cityInput" placeholder="Например: Москва" value="Москва">
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>День</label>
+                    <input type="number" id="dayInput" min="1" max="31" placeholder="15" value="15">
+                </div>
+                <div class="form-group">
+                    <label>Месяц</label>
+                    <input type="number" id="monthInput" min="1" max="12" placeholder="5" value="5">
+                </div>
+                <div class="form-group">
+                    <label>Год</label>
+                    <input type="number" id="yearInput" min="1900" max="2030" placeholder="1990" value="1990">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Часы</label>
+                    <input type="number" id="hourInput" min="0" max="23" placeholder="14" value="14">
+                </div>
+                <div class="form-group">
+                    <label>Минуты</label>
+                    <input type="number" id="minuteInput" min="0" max="59" placeholder="30" value="30">
+                </div>
+                <div class="form-group">
+                    <label>&nbsp;</label>
+                    <button class="calc-btn" id="calcBtn" onclick="calculateAscendant()">Рассчитать</button>
+                </div>
+            </div>
+            <div id="ascendantResult" class="hidden"></div>
         </div>
     </div>
 
@@ -127,6 +181,60 @@
             document.getElementById('content-focus').textContent = data.focus;
             document.getElementById('content-do').textContent = data.do;
             document.getElementById('content-avoid').textContent = data.avoid;
+        }
+
+        // Расчет асцендента через Cloudflare Worker
+        async function calculateAscendant() {
+            const city = document.getElementById('cityInput').value.trim();
+            const day = document.getElementById('dayInput').value;
+            const month = document.getElementById('monthInput').value;
+            const year = document.getElementById('yearInput').value;
+            const hour = document.getElementById('hourInput').value || 12;
+            const minute = document.getElementById('minuteInput').value || 0;
+
+            if (!city || !day || !month || !year) {
+                showAscendantError('Заполните все поля');
+                return;
+            }
+
+            const btn = document.getElementById('calcBtn');
+            const resultDiv = document.getElementById('ascendantResult');
+            
+            btn.disabled = true;
+            btn.textContent = 'Считаем...';
+            resultDiv.classList.add('hidden');
+
+            try {
+                const url = `https://horoscope-api.fit-for.workers.dev/?city=${encodeURIComponent(city)}&year=${year}&month=${month}&day=${day}&hour=${hour}&minute=${minute}`;
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (data.error) {
+                    showAscendantError(data.error);
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="ascendant-result">
+                            <h3>♈ Асцендент в знаке ${data.ascendant.sign}</h3>
+                            <p><strong>Градус:</strong> ${data.ascendant.degree_in_sign}</p>
+                            <p><strong>Город:</strong> ${data.city}</p>
+                            <p><strong>Координаты:</strong> ${data.coordinates.lat.toFixed(4)}, ${data.coordinates.lon.toFixed(4)}</p>
+                            <p style="margin-top: 12px; border-top: 1px solid #333; padding-top: 10px;">${data.interpretation}</p>
+                        </div>
+                    `;
+                    resultDiv.classList.remove('hidden');
+                }
+            } catch (error) {
+                showAscendantError('Ошибка соединения с сервером. Попробуйте позже.');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Рассчитать';
+            }
+        }
+
+        function showAscendantError(message) {
+            const resultDiv = document.getElementById('ascendantResult');
+            resultDiv.innerHTML = `<div class="error-msg">${message}</div>`;
+            resultDiv.classList.remove('hidden');
         }
     </script>
 </body>
