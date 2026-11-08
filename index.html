@@ -8,7 +8,7 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         
@@ -16,16 +16,17 @@
             --bg: #0a0a0f;
             --bg-card: #13131a;
             --bg-elevated: #1a1a23;
-            --border: #25252f;
-            --text: #e8e4df;
-            --text-dim: #8a8690;
-            --text-muted: #5a5760;
-            --accent: #c9b8ff;
-            --accent-dim: rgba(201, 184, 255, 0.15);
+            --border: #2a2a35;
+            --text: #f0ece6;
+            --text-dim: #9a96a0;
+            --text-muted: #6a6770;
+            --accent: #d4c8ff;
+            --accent-dim: rgba(212, 200, 255, 0.12);
             --success: #7dd3a0;
             --danger: #ff7b8a;
             --venus: #e891a8;
             --mars: #ff9b7a;
+            --gold: #d4af37;
         }
         
         html, body {
@@ -43,7 +44,6 @@
             -webkit-font-smoothing: antialiased;
         }
         
-        /* Главный контейнер с отступом под нижнюю панель */
         .app {
             height: 100vh;
             height: 100dvh;
@@ -62,7 +62,6 @@
         
         .content::-webkit-scrollbar { display: none; }
         
-        /* Экраны */
         .screen { display: none; animation: fadeIn 0.3s ease; }
         .screen.active { display: block; }
         
@@ -71,7 +70,6 @@
             to { opacity: 1; transform: translateY(0); }
         }
         
-        /* Заголовки */
         .screen-header {
             margin-bottom: 28px;
             padding-top: 8px;
@@ -92,7 +90,6 @@
             font-weight: 300;
         }
         
-        /* Сетка знаков */
         .signs-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -102,42 +99,31 @@
         
         .sign-card {
             background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            padding: 16px 8px;
+            border: 1.5px solid var(--border);
+            border-radius: 12px;
+            padding: 18px 8px;
             text-align: center;
             cursor: pointer;
             transition: all 0.25s ease;
             position: relative;
-            overflow: hidden;
-        }
-        
-        .sign-card::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, var(--accent), transparent);
-            opacity: 0;
-            transition: opacity 0.25s;
         }
         
         .sign-card:hover {
             background: var(--bg-elevated);
-            border-color: #35354a;
+            border-color: #3a3a4a;
             transform: translateY(-2px);
         }
         
         .sign-card.active {
             background: var(--accent-dim);
             border-color: var(--accent);
+            box-shadow: 0 4px 20px rgba(212, 200, 255, 0.15);
         }
         
-        .sign-card.active::before { opacity: 1; }
-        
         .sign-name {
-            font-size: 0.9rem;
+            font-size: 0.95rem;
             font-weight: 400;
+            color: var(--text);
             letter-spacing: 0.3px;
         }
         
@@ -146,7 +132,6 @@
             font-weight: 500;
         }
         
-        /* Сегментированный переключатель */
         .segmented {
             display: flex;
             background: var(--bg-card);
@@ -162,7 +147,7 @@
             border: none;
             color: var(--text-dim);
             padding: 10px 4px;
-            font-size: 0.8rem;
+            font-size: 0.82rem;
             font-weight: 400;
             cursor: pointer;
             border-radius: 7px;
@@ -177,12 +162,11 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.3);
         }
         
-        /* Карточка прогноза */
         .forecast-card {
             background: var(--bg-card);
             border: 1px solid var(--border);
             border-radius: 16px;
-            padding: 22px;
+            padding: 24px;
             margin-bottom: 16px;
         }
         
@@ -190,13 +174,13 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 18px;
-            padding-bottom: 14px;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
             border-bottom: 1px solid var(--border);
         }
         
         .forecast-date {
-            font-size: 0.75rem;
+            font-size: 0.78rem;
             color: var(--text-muted);
             letter-spacing: 0.5px;
         }
@@ -206,26 +190,28 @@
             color: var(--text-dim);
             font-family: 'SF Mono', 'Monaco', monospace;
             letter-spacing: 0.3px;
+            max-width: 60%;
+            text-align: right;
         }
         
         .forecast-section {
-            margin-bottom: 18px;
+            margin-bottom: 22px;
         }
         
         .forecast-section:last-child { margin-bottom: 0; }
         
         .forecast-label {
-            font-size: 0.7rem;
+            font-size: 0.72rem;
             text-transform: uppercase;
             color: var(--text-muted);
             letter-spacing: 1.5px;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
             font-weight: 500;
         }
         
         .forecast-text {
-            font-size: 1rem;
-            line-height: 1.55;
+            font-size: 1.02rem;
+            line-height: 1.6;
             color: var(--text);
             font-weight: 300;
         }
@@ -237,49 +223,125 @@
             padding: 14px;
             background: var(--bg-elevated);
             border-radius: 10px;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
             border-left: 2px solid var(--accent);
         }
         
         .planet-row.venus { border-left-color: var(--venus); }
         .planet-row.mars { border-left-color: var(--mars); }
         
-        .planet-symbol {
-            font-size: 1.1rem;
-            flex-shrink: 0;
-            margin-top: 2px;
+        .planet-label {
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            font-weight: 500;
+            margin-bottom: 6px;
         }
         
         .planet-text {
-            font-size: 0.88rem;
+            font-size: 0.9rem;
             line-height: 1.5;
             color: var(--text);
         }
         
-        /* Пустое состояние */
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: var(--text-muted);
+        .premium-teaser {
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.08) 0%, rgba(212, 175, 55, 0.03) 100%);
+            border: 1px solid rgba(212, 175, 55, 0.25);
+            border-radius: 14px;
+            padding: 22px;
+            margin-top: 20px;
+            position: relative;
+            overflow: hidden;
         }
         
-        .empty-state-icon {
-            font-size: 2.5rem;
+        .premium-teaser::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
+        }
+        
+        .premium-badge {
+            display: inline-block;
+            background: var(--gold);
+            color: #000;
+            font-size: 0.68rem;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
             margin-bottom: 12px;
-            opacity: 0.4;
         }
         
-        .empty-state-text {
-            font-size: 0.9rem;
-            font-weight: 300;
+        .premium-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.3rem;
+            font-weight: 400;
+            margin-bottom: 10px;
+            color: var(--text);
         }
         
-        /* Форма асцендента */
+        .premium-text {
+            font-size: 0.88rem;
+            line-height: 1.55;
+            color: var(--text-dim);
+            margin-bottom: 16px;
+        }
+        
+        .premium-features {
+            list-style: none;
+            margin-bottom: 18px;
+        }
+        
+        .premium-features li {
+            font-size: 0.85rem;
+            color: var(--text-dim);
+            padding: 6px 0;
+            padding-left: 20px;
+            position: relative;
+        }
+        
+        .premium-features li::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 12px;
+            width: 6px;
+            height: 6px;
+            background: var(--gold);
+            border-radius: 50%;
+        }
+        
+        .premium-btn {
+            width: 100%;
+            background: var(--gold);
+            color: #000;
+            border: none;
+            padding: 14px;
+            border-radius: 10px;
+            font-size: 0.92rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+            letter-spacing: 0.3px;
+        }
+        
+        .premium-btn:hover {
+            background: #e5c158;
+            transform: translateY(-1px);
+        }
+        
         .form-group { margin-bottom: 16px; }
         
         .form-label { 
             display: block; 
-            font-size: 0.7rem; 
+            font-size: 0.72rem; 
             color: var(--text-muted);
             margin-bottom: 8px;
             text-transform: uppercase;
@@ -442,7 +504,6 @@
             text-decoration: none;
         }
         
-        /* О сервисе */
         .about-section {
             margin-bottom: 24px;
         }
@@ -483,14 +544,13 @@
             margin-top: 20px;
         }
         
-        /* Нижняя навигация */
         .tab-bar {
             display: flex;
-            background: rgba(10, 10, 15, 0.95);
+            background: rgba(10, 10, 15, 0.98);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border-top: 1px solid var(--border);
-            padding: 8px 0 calc(8px + env(safe-area-inset-bottom));
+            padding: 10px 0 calc(10px + env(safe-area-inset-bottom));
             position: sticky;
             bottom: 0;
             z-index: 100;
@@ -514,12 +574,17 @@
         .tab-item.active { color: var(--accent); }
         
         .tab-icon {
-            font-size: 1.3rem;
+            font-size: 1.2rem;
             line-height: 1;
+            opacity: 0.7;
+        }
+        
+        .tab-item.active .tab-icon {
+            opacity: 1;
         }
         
         .tab-label {
-            font-size: 0.65rem;
+            font-size: 0.68rem;
             font-weight: 400;
             letter-spacing: 0.3px;
         }
@@ -527,13 +592,14 @@
         .tab-item.active .tab-label {
             font-weight: 500;
         }
+        
+        .hidden { display: none; }
     </style>
 </head>
 <body>
     <div class="app">
         <div class="content">
             
-            <!-- ЭКРАН 1: ГОРОСКОП -->
             <div class="screen active" id="screen-horoscope">
                 <div class="screen-header">
                     <h1 class="screen-title">Гороскоп</h1>
@@ -558,7 +624,6 @@
                 <div id="forecastContainer"></div>
             </div>
             
-            <!-- ЭКРАН 2: АСЦЕНДЕНТ -->
             <div class="screen" id="screen-ascendant">
                 <div class="screen-header">
                     <h1 class="screen-title">Асцендент</h1>
@@ -608,10 +673,10 @@
                     <div class="form-group">
                         <label class="form-label">Примерное время</label>
                         <select class="form-select" id="timeOfDay">
-                            <option value="09:00">Утро (06–12)</option>
-                            <option value="15:00" selected>День (12–18)</option>
-                            <option value="21:00">Вечер (18–00)</option>
-                            <option value="03:00">Ночь (00–06)</option>
+                            <option value="09:00">Утро (06-12)</option>
+                            <option value="15:00" selected>День (12-18)</option>
+                            <option value="21:00">Вечер (18-00)</option>
+                            <option value="03:00">Ночь (00-06)</option>
                         </select>
                     </div>
                 </div>
@@ -627,7 +692,6 @@
                 <div id="ascendantResult"></div>
             </div>
             
-            <!-- ЭКРАН 3: О СЕРВИСЕ -->
             <div class="screen" id="screen-about">
                 <div class="screen-header">
                     <h1 class="screen-title">О сервисе</h1>
@@ -645,9 +709,7 @@
                 <div class="about-section">
                     <h2 class="about-title">Что мы считаем</h2>
                     <p class="about-text">
-                        • Положение Солнца, Луны, Меркурия, Венеры и Марса<br>
-                        • Статус Меркурия (прямой или ретроградный)<br>
-                        • Асцендент по вашему месту и времени рождения
+                        Положение Солнца, Луны, Меркурия, Венеры и Марса. Статус Меркурия (прямой или ретроградный). Асцендент по вашему месту и времени рождения.
                     </p>
                 </div>
                 
@@ -658,7 +720,7 @@
                         и сразу удаляются из памяти сервера.
                     </p>
                     <p class="about-text">
-                        <a href="privacy.html" target="_blank" class="about-link">Полная политика конфиденциальности →</a>
+                        <a href="privacy.html" target="_blank" class="about-link">Полная политика конфиденциальности</a>
                     </p>
                 </div>
                 
@@ -670,7 +732,6 @@
             
         </div>
         
-        <!-- НИЖНЯЯ НАВИГАЦИЯ -->
         <nav class="tab-bar">
             <button class="tab-item active" data-screen="horoscope">
                 <span class="tab-icon">✦</span>
@@ -688,18 +749,16 @@
     </div>
 
     <script>
-        const VERSION = '2026.11.09.2';
+        const VERSION = '2026.11.09.4';
         let horoscopeData = null;
         let currentSign = null;
         let currentPeriod = 'today';
 
-        // Загрузка данных
         fetch('horoscope.json?v=' + VERSION)
             .then(r => r.json())
             .then(data => { horoscopeData = data; })
             .catch(err => console.error('Ошибка загрузки:', err));
 
-        // Навигация между экранами
         document.querySelectorAll('.tab-item').forEach(tab => {
             tab.addEventListener('click', () => {
                 const screenId = tab.dataset.screen;
@@ -711,7 +770,6 @@
             });
         });
 
-        // Выбор знака
         document.querySelectorAll('.sign-card').forEach(card => {
             card.addEventListener('click', () => {
                 document.querySelectorAll('.sign-card').forEach(c => c.classList.remove('active'));
@@ -721,7 +779,6 @@
             });
         });
 
-        // Сегментированный переключатель периодов
         function getPeriodButtons() {
             return [
                 { id: 'today', label: 'День' },
@@ -761,24 +818,32 @@
                     'sagittarius': 'Стрелец', 'capricorn': 'Козерог', 'aquarius': 'Водолей', 'pisces': 'Рыбы'
                 };
                 
+                // Очищаем astro_fact от эмодзи
+                let astroFact = data.astro_fact;
+                astroFact = astroFact.replace(/[☉☽☿♀♂]/g, '').replace(/\|/g, ' · ').replace(/\s+/g, ' ').trim();
+                
                 html += `
                     <div class="forecast-card">
                         <div class="forecast-meta">
                             <span class="forecast-date">${signNames[currentSign]} · ${data.date_ref}</span>
-                            <span class="forecast-astro">${data.astro_fact}</span>
+                            <span class="forecast-astro">${astroFact}</span>
                         </div>
                         
                         <div class="planet-row venus">
-                            <span class="planet-symbol">♀</span>
-                            <span class="planet-text">${data.venus}</span>
+                            <div>
+                                <div class="planet-label">Венера</div>
+                                <div class="planet-text">${data.venus}</div>
+                            </div>
                         </div>
                         <div class="planet-row mars">
-                            <span class="planet-symbol">♂</span>
-                            <span class="planet-text">${data.mars}</span>
+                            <div>
+                                <div class="planet-label">Марс</div>
+                                <div class="planet-text">${data.mars}</div>
+                            </div>
                         </div>
                         
                         <div class="forecast-section" style="margin-top: 18px;">
-                            <div class="forecast-label">Фокус</div>
+                            <div class="forecast-label">Фокус периода</div>
                             <div class="forecast-text">${data.focus}</div>
                         </div>
                         <div class="forecast-section">
@@ -786,16 +851,32 @@
                             <div class="forecast-text">${data.do}</div>
                         </div>
                         <div class="forecast-section">
-                            <div class="forecast-label">Избегать</div>
+                            <div class="forecast-label">Категорически избегать</div>
                             <div class="forecast-text">${data.avoid}</div>
                         </div>
+                    </div>
+                    
+                    <div class="premium-teaser">
+                        <span class="premium-badge">Полный разбор</span>
+                        <h3 class="premium-title">Узнайте всё о вашей натальной карте</h3>
+                        <p class="premium-text">
+                            Бесплатный гороскоп показывает лишь поверхностные транзиты. 
+                            Полный разбор раскроет ваши кармические задачи, сильные стороны и точки роста.
+                        </p>
+                        <ul class="premium-features">
+                            <li>Все 12 домов гороскопа с детальной интерпретацией</li>
+                            <li>Аспекты между планетами и их влияние на судьбу</li>
+                            <li>Кармические узлы и задачи воплощения</li>
+                            <li>Прогноз на 12 месяцев с точными датами событий</li>
+                            <li>Совместимость с партнёром (синастрия)</li>
+                        </ul>
+                        <button class="premium-btn" onclick="showPremiumInfo()">Получить полный разбор — 499 ₽</button>
                     </div>
                 `;
             }
             
             container.innerHTML = html;
             
-            // Навешиваем обработчики на сегменты
             container.querySelectorAll('.segment').forEach(btn => {
                 btn.addEventListener('click', () => {
                     currentPeriod = btn.dataset.period;
@@ -804,14 +885,16 @@
             });
         }
 
-        // Переключение времени
+        function showPremiumInfo() {
+            alert('Полный разбор натальной карты — 499 ₽\n\nВключает:\n• 12 домов гороскопа\n• Все аспекты планет\n• Кармические задачи\n• Прогноз на 12 месяцев\n• Совместимость с партнёром\n\nДля покупки напишите боту: @astro_facts_bot');
+        }
+
         function toggleTimeInput() {
             const isApproximate = document.getElementById('approximateTime').checked;
             document.getElementById('exactTimeBlock').classList.toggle('hidden', isApproximate);
             document.getElementById('approximateTimeBlock').classList.toggle('hidden', !isApproximate);
         }
 
-        // Расчёт асцендента
         async function calculateAscendant() {
             if (!document.getElementById('consentCheckbox').checked) {
                 showAscendantError('Подтвердите согласие на обработку данных');
