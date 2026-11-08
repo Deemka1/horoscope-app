@@ -1,6 +1,6 @@
 import json
 from datetime import datetime
-from kerykeion import AstrologicalSubject
+from kerykeion import AstrologicalSubjectFactory
 
 MOON_TEMPLATES = {
     'Aries': {'focus': 'Инициатива и быстрые решения', 'do': 'Начни то, что откладывал', 'avoid': 'Импульсивных трат'},
@@ -24,11 +24,24 @@ MERCURY_RETROGRADE_TEMPLATE = {
 }
 
 today = datetime.now()
-subject = AstrologicalSubject("Today", today.year, today.month, today.day, 12, 0, "Moscow", "RU")
 
-# Правильные названия атрибутов в kerykeion
-moon_sign = subject.moon_sign
-mercury_retrograde = subject.mercury.is_retrograde
+# Создаем объект на сегодня (Москва, онлайн-поиск отключен, чтобы не было предупреждений)
+subject = AstrologicalSubjectFactory.from_birth_data(
+    name="Today",
+    year=today.year,
+    month=today.month,
+    day=today.day,
+    hour=12,
+    minute=0,
+    lng=37.6173,
+    lat=55.7558,
+    tz_str="Europe/Moscow",
+    online=False
+)
+
+# Правильные атрибуты для актуальной версии kerykeion
+moon_sign = subject.moon.sign
+mercury_retrograde = subject.mercury.retrograde
 
 horoscope = {}
 for sign in MOON_TEMPLATES.keys():
