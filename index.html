@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
     <title>Астро-факты</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0a0a0a; color: #fff; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 20px; }
@@ -46,10 +46,50 @@
         .ascendant-result p { font-size: 0.95rem; line-height: 1.5; color: #ccc; margin-bottom: 8px; }
         .error-msg { color: #ff6b6b; text-align: center; padding: 10px; }
         
-        /* Стили для чекбокса переключения */
         .time-toggle { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; padding: 10px; background: #1a1a1a; border-radius: 6px; border: 1px solid #333; }
         .time-toggle input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; }
         .time-toggle label { font-size: 0.9rem; color: #ccc; cursor: pointer; margin: 0; }
+        
+        /* Новые стили для согласия и дисклеймера */
+        .consent-block { 
+            background: #1a1a1a; 
+            border: 1px solid #333; 
+            border-radius: 6px; 
+            padding: 12px; 
+            margin: 15px 0; 
+            display: flex; 
+            align-items: flex-start; 
+            gap: 10px;
+        }
+        .consent-block input[type="checkbox"] { 
+            width: 18px; 
+            height: 18px; 
+            cursor: pointer; 
+            margin-top: 2px;
+        }
+        .consent-block label { 
+            font-size: 0.85rem; 
+            color: #aaa; 
+            cursor: pointer; 
+            line-height: 1.4;
+        }
+        .consent-block a { 
+            color: #4CAF50; 
+            text-decoration: none;
+        }
+        .consent-block a:hover { 
+            text-decoration: underline;
+        }
+        
+        .disclaimer { 
+            font-size: 0.75rem; 
+            color: #666; 
+            text-align: center; 
+            margin-top: 20px; 
+            padding: 15px; 
+            border-top: 1px solid #222;
+            line-height: 1.4;
+        }
     </style>
 </head>
 <body>
@@ -108,13 +148,11 @@
                 <div class="form-group"><label>Год</label><input type="number" id="yearInput" min="1900" max="2030" value="1990"></div>
             </div>
             
-            <!-- Чекбокс переключения -->
             <div class="time-toggle">
                 <input type="checkbox" id="approximateTime" onchange="toggleTimeInput()">
                 <label for="approximateTime">Не помню точное время, выбрать примерное</label>
             </div>
 
-            <!-- Точное время (по умолчанию видно) -->
             <div id="exactTimeBlock">
                 <div class="form-row">
                     <div class="form-group"><label>Часы</label><input type="number" id="hourInput" min="0" max="23" value="14"></div>
@@ -123,7 +161,6 @@
                 </div>
             </div>
 
-            <!-- Примерное время (по умолчанию скрыто) -->
             <div id="approximateTimeBlock" class="hidden">
                 <div class="form-group">
                     <label>Примерное время рождения</label>
@@ -136,8 +173,22 @@
                 </div>
             </div>
 
+            <!-- Блок согласия на обработку ПДн -->
+            <div class="consent-block">
+                <input type="checkbox" id="consentCheckbox">
+                <label for="consentCheckbox">
+                    Я согласен на обработку персональных данных (город, дата и время рождения) для расчета Асцендента. 
+                    Данные не хранятся. <a href="privacy.html" target="_blank">Политика конфиденциальности</a>
+                </label>
+            </div>
+
             <button class="calc-btn" id="calcBtn" onclick="calculateAscendant()">Рассчитать</button>
             <div id="ascendantResult" class="hidden"></div>
+        </div>
+
+        <!-- Дисклеймер -->
+        <div class="disclaimer">
+            ⚠️ Сервис носит исключительно развлекательный характер. Астрологические расчеты не являются научно доказанными фактами и не могут служить основанием для принятия важных жизненных решений.
         </div>
     </div>
 
@@ -186,7 +237,6 @@
             document.getElementById('content-avoid').textContent = data.avoid;
         }
 
-        // Переключение между точным и примерным временем
         function toggleTimeInput() {
             const isApproximate = document.getElementById('approximateTime').checked;
             const exactBlock = document.getElementById('exactTimeBlock');
@@ -202,6 +252,13 @@
         }
 
         async function calculateAscendant() {
+            // Проверяем согласие
+            const consentChecked = document.getElementById('consentCheckbox').checked;
+            if (!consentChecked) {
+                showAscendantError('Поставьте галочку согласия на обработку данных');
+                return;
+            }
+
             const city = document.getElementById('cityInput').value.trim();
             const day = document.getElementById('dayInput').value;
             const month = document.getElementById('monthInput').value;
@@ -211,11 +268,9 @@
             let hour, minute;
             
             if (isApproximate) {
-                // Берем время из выпадающего списка
                 const timeString = document.getElementById('timeOfDay').value;
                 [hour, minute] = timeString.split(':');
             } else {
-                // Берем точное время из полей
                 hour = document.getElementById('hourInput').value;
                 minute = document.getElementById('minuteInput').value;
             }
