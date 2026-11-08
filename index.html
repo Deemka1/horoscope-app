@@ -3,33 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Астро-чеклист</title>
+    <title>Астро-факты</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0a0a0a; color: #fff; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 20px; }
         .container { max-width: 600px; width: 100%; }
-        h1 { font-size: 2rem; margin-bottom: 20px; text-align: center; font-weight: 300; }
-        .sign-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
-        .sign-btn { background: #1a1a1a; border: 1px solid #333; color: #fff; padding: 15px; border-radius: 8px; cursor: pointer; transition: all 0.2s; font-size: 0.9rem; }
-        .sign-btn:hover { background: #2a2a2a; border-color: #555; }
-        .sign-btn.active { background: #2a2a2a; border-color: #fff; }
+        h1 { font-size: 1.8rem; margin-bottom: 20px; text-align: center; font-weight: 300; letter-spacing: 1px; }
         
-        .tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 10px; }
-        .tab-btn { background: transparent; border: none; color: #888; padding: 10px 15px; cursor: pointer; font-size: 1rem; transition: all 0.2s; }
-        .tab-btn:hover { color: #fff; }
-        .tab-btn.active { color: #fff; border-bottom: 2px solid #fff; }
+        .sign-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
+        .sign-btn { background: #1a1a1a; border: 1px solid #333; color: #fff; padding: 12px 5px; border-radius: 8px; cursor: pointer; transition: all 0.2s; font-size: 0.85rem; }
+        .sign-btn:hover { background: #2a2a2a; border-color: #555; }
+        .sign-btn.active { background: #2a2a2a; border-color: #fff; font-weight: bold; }
+        
+        .tabs { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 20px; border-bottom: 1px solid #333; scrollbar-width: none; }
+        .tabs::-webkit-scrollbar { display: none; }
+        .tab-btn { background: transparent; border: none; color: #666; padding: 8px 12px; cursor: pointer; font-size: 0.9rem; white-space: nowrap; transition: all 0.2s; border-radius: 6px; }
+        .tab-btn:hover { color: #fff; background: #1a1a1a; }
+        .tab-btn.active { color: #fff; background: #333; font-weight: bold; }
 
-        .horoscope-card { background: #1a1a1a; border: 1px solid #333; border-radius: 12px; padding: 25px; margin-top: 10px; }
-        .section { margin-bottom: 20px; }
-        .section-title { font-size: 0.8rem; text-transform: uppercase; color: #888; margin-bottom: 8px; letter-spacing: 1px; }
-        .section-content { font-size: 1.1rem; line-height: 1.5; }
-        .meta { font-size: 0.8rem; color: #666; text-align: center; margin-top: 20px; padding-top: 15px; border-top: 1px solid #333; }
+        .horoscope-card { background: #1a1a1a; border: 1px solid #333; border-radius: 12px; padding: 20px; }
+        .section { margin-bottom: 18px; }
+        .section-title { font-size: 0.75rem; text-transform: uppercase; color: #888; margin-bottom: 6px; letter-spacing: 1px; }
+        .section-content { font-size: 1.05rem; line-height: 1.5; color: #e0e0e0; }
+        
+        .astro-fact { background: #252525; border-left: 3px solid #555; padding: 12px; margin-bottom: 20px; border-radius: 0 8px 8px 0; font-size: 0.9rem; color: #ccc; }
+        .date-ref { font-size: 0.8rem; color: #666; text-align: right; margin-bottom: 15px; font-style: italic; }
+        
+        .meta { font-size: 0.75rem; color: #555; text-align: center; margin-top: 25px; padding-top: 15px; border-top: 1px solid #222; }
         .hidden { display: none; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Астро-чеклист</h1>
+        <h1>Астро-факты</h1>
         <div class="sign-grid" id="signGrid">
             <button class="sign-btn" data-sign="aries">Овен</button>
             <button class="sign-btn" data-sign="taurus">Телец</button>
@@ -46,86 +52,70 @@
         </div>
 
         <div id="horoscopeCard" class="horoscope-card hidden">
-            <div class="tabs">
+            <div class="tabs" id="tabsContainer">
                 <button class="tab-btn active" data-tab="today">Сегодня</button>
-                <button class="tab-btn" data-tab="week">Неделя</button>
-                <button class="tab-btn" data-tab="month">Месяц</button>
+                <button class="tab-btn" data-tab="tomorrow">Завтра</button>
+                <button class="tab-btn" data-tab="this_week">Эта неделя</button>
+                <button class="tab-btn" data-tab="next_week">След. неделя</button>
+                <button class="tab-btn" data-tab="this_month">Этот месяц</button>
+                <button class="tab-btn" data-tab="next_month">След. месяц</button>
+                <button class="tab-btn" data-tab="this_year">Этот год</button>
             </div>
 
-            <div id="content-today">
-                <div class="section"><div class="section-title">Фокус дня</div><div class="section-content" id="today-focus"></div></div>
-                <div class="section"><div class="section-title">Сделать</div><div class="section-content" id="today-do"></div></div>
-                <div class="section"><div class="section-title">Избегать</div><div class="section-content" id="today-avoid"></div></div>
-            </div>
+            <div class="date-ref" id="dateRef"></div>
+            <div class="astro-fact" id="astroFact"></div>
 
-            <div id="content-week" class="hidden">
-                <div class="section"><div class="section-title">Прогноз на неделю</div><div class="section-content" id="week-text"></div></div>
-            </div>
-
-            <div id="content-month" class="hidden">
-                <div class="section"><div class="section-title">Прогноз на месяц</div><div class="section-content" id="month-text"></div></div>
-            </div>
+            <div class="section"><div class="section-title">Фокус периода</div><div class="section-content" id="content-focus"></div></div>
+            <div class="section"><div class="section-title">Рекомендуется</div><div class="section-content" id="content-do"></div></div>
+            <div class="section"><div class="section-title">Категорически избегать</div><div class="section-content" id="content-avoid"></div></div>
 
             <div class="meta" id="meta"></div>
-        </div>
+        </div
     </div>
 
     <script>
         let horoscopeData = null;
         let currentSign = null;
+        let currentTab = 'today';
 
         fetch('horoscope.json')
             .then(r => r.json())
-            .then(data => { horoscopeData = data; })
+            .then(data => { 
+                horoscopeData = data; 
+                const rx = data.meta.current_mercury_rx ? "⚠️ Меркурий ретроградный" : "✅ Меркурий прямой";
+                document.getElementById('meta').textContent = `Система работает на реальных эфемеридах. Текущая Луна: ${data.meta.current_moon}. ${rx}.`;
+            })
             .catch(err => console.error('Ошибка загрузки:', err));
 
-        // Выбор знака
         document.querySelectorAll('.sign-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 currentSign = btn.dataset.sign;
                 document.querySelectorAll('.sign-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 document.getElementById('horoscopeCard').classList.remove('hidden');
-                renderContent('today'); // По умолчанию открываем "Сегодня"
+                renderContent();
             });
         });
 
-        // Переключение табов
         document.querySelectorAll('.tab-btn').forEach(btn => {
             btn.addEventListener('click', () => {
-                const tab = btn.dataset.tab;
+                currentTab = btn.dataset.tab;
                 document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
-                renderContent(tab);
+                renderContent();
             });
         });
 
-        function renderContent(tab) {
+        function renderContent() {
             if (!horoscopeData || !currentSign) return;
 
-            const data = horoscopeData[currentSign];
-            const meta = horoscopeData.meta;
-
-            // Скрываем все контентные блоки
-            document.getElementById('content-today').classList.add('hidden');
-            document.getElementById('content-week').classList.add('hidden');
-            document.getElementById('content-month').classList.add('hidden');
-
-            if (tab === 'today') {
-                document.getElementById('content-today').classList.remove('hidden');
-                document.getElementById('today-focus').textContent = data.today.focus;
-                document.getElementById('today-do').textContent = data.today.do;
-                document.getElementById('today-avoid').textContent = data.today.avoid;
-            } else if (tab === 'week') {
-                document.getElementById('content-week').classList.remove('hidden');
-                document.getElementById('week-text').textContent = data.week;
-            } else if (tab === 'month') {
-                document.getElementById('content-month').classList.remove('hidden');
-                document.getElementById('month-text').textContent = data.month;
-            }
-
-            let retroText = meta.mercury_retrograde ? "⚠️ Меркурий ретроградный" : "✅ Меркурий прямой";
-            document.getElementById('meta').textContent = `Луна сегодня: ${meta.moon_sign_today} | Луна завтра: ${meta.moon_sign_tomorrow} | ${retroText} | Обновлено: ${meta.date}`;
+            const data = horoscopeData[currentSign][currentTab];
+            
+            document.getElementById('dateRef').textContent = `Ориентировочная дата расчета: ${data.date_ref}`;
+            document.getElementById('astroFact').textContent = `🪐 Астро-факт: ${data.astro_fact}`;
+            document.getElementById('content-focus').textContent = data.focus;
+            document.getElementById('content-do').textContent = data.do;
+            document.getElementById('content-avoid').textContent = data.avoid;
         }
     </script>
 </body>
