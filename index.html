@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Астро-чеклист</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0a0a0a; color: #fff; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        .container { max-width: 600px; width: 100%; }
+        h1 { font-size: 2rem; margin-bottom: 30px; text-align: center; font-weight: 300; }
+        .sign-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 30px; }
+        .sign-btn { background: #1a1a1a; border: 1px solid #333; color: #fff; padding: 15px; border-radius: 8px; cursor: pointer; transition: all 0.2s; font-size: 0.9rem; }
+        .sign-btn:hover { background: #2a2a2a; border-color: #555; }
+        .sign-btn.active { background: #2a2a2a; border-color: #fff; }
+        .horoscope-card { background: #1a1a1a; border: 1px solid #333; border-radius: 12px; padding: 25px; margin-top: 20px; }
+        .section { margin-bottom: 20px; }
+        .section-title { font-size: 0.8rem; text-transform: uppercase; color: #888; margin-bottom: 8px; letter-spacing: 1px; }
+        .section-content { font-size: 1.1rem; line-height: 1.5; }
+        .meta { font-size: 0.8rem; color: #666; text-align: center; margin-top: 20px; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Астро-чеклист</h1>
+        <div class="sign-grid" id="signGrid">
+            <button class="sign-btn" data-sign="aries">Овен</button>
+            <button class="sign-btn" data-sign="taurus">Телец</button>
+            <button class="sign-btn" data-sign="gemini">Близнецы</button>
+            <button class="sign-btn" data-sign="cancer">Рак</button>
+            <button class="sign-btn" data-sign="leo">Лев</button>
+            <button class="sign-btn" data-sign="virgo">Дева</button>
+            <button class="sign-btn" data-sign="libra">Весы</button>
+            <button class="sign-btn" data-sign="scorpio">Скорпион</button>
+            <button class="sign-btn" data-sign="sagittarius">Стрелец</button>
+            <button class="sign-btn" data-sign="capricorn">Козерог</button>
+            <button class="sign-btn" data-sign="aquarius">Водолей</button>
+            <button class="sign-btn" data-sign="pisces">Рыбы</button>
+        </div>
+        <div id="horoscopeCard" class="horoscope-card hidden">
+            <div class="section"><div class="section-title">Фокус дня</div><div class="section-content" id="focus"></div></div>
+            <div class="section"><div class="section-title">Сделать</div><div class="section-content" id="do"></div></div>
+            <div class="section"><div class="section-title">Избегать</div><div class="section-content" id="avoid"></div></div>
+            <div class="meta" id="meta"></div>
+        </div>
+    </div>
+    <script>
+        let horoscopeData = null;
+        fetch('horoscope.json')
+            .then(r => r.json())
+            .then(data => { horoscopeData = data; })
+            .catch(err => console.error('Ошибка:', err));
+
+        document.querySelectorAll('.sign-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const sign = btn.dataset.sign;
+                document.querySelectorAll('.sign-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                document.getElementById('horoscopeCard').classList.remove('hidden');
+                document.getElementById('focus').textContent = horoscopeData[sign].focus;
+                document.getElementById('do').textContent = horoscopeData[sign].do;
+                document.getElementById('avoid').textContent = horoscopeData[sign].avoid;
+                document.getElementById('meta').textContent = `Луна в ${horoscopeData.meta.moon_sign} | Обновлено: ${horoscopeData.meta.date}`;
+            });
+        });
+    </script>
+</body>
+</html>
