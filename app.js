@@ -1,4 +1,4 @@
-const VERSION = '2026.11.09.5';
+const VERSION = '2026.11.09.6';
 let horoscopeData = null;
 let currentSign = null;
 let currentPeriod = 'today';
@@ -16,13 +16,11 @@ const PERIODS = [
     { id: 'this_year', label: 'Год' }
 ];
 
-// Загрузка данных
 fetch('horoscope.json?v=' + VERSION)
     .then(r => r.json())
     .then(data => { horoscopeData = data; })
     .catch(err => console.error('Ошибка загрузки:', err));
 
-// Навигация между экранами
 document.querySelectorAll('.tab-item').forEach(tab => {
     tab.addEventListener('click', () => {
         const screenId = tab.dataset.screen;
@@ -34,7 +32,6 @@ document.querySelectorAll('.tab-item').forEach(tab => {
     });
 });
 
-// Выбор знака
 document.querySelectorAll('.sign-card').forEach(card => {
     card.addEventListener('click', () => {
         document.querySelectorAll('.sign-card').forEach(c => c.classList.remove('active'));
@@ -44,7 +41,6 @@ document.querySelectorAll('.sign-card').forEach(card => {
     });
 });
 
-// Рендер прогноза
 function renderForecast() {
     const container = document.getElementById('forecastContainer');
     
@@ -126,14 +122,12 @@ function renderForecast() {
     });
 }
 
-// Переключение времени
 function toggleTimeInput() {
     const isApproximate = document.getElementById('approximateTime').checked;
     document.getElementById('exactTimeBlock').classList.toggle('hidden', isApproximate);
     document.getElementById('approximateTimeBlock').classList.toggle('hidden', !isApproximate);
 }
 
-// Расчёт асцендента
 async function calculateAscendant() {
     if (!document.getElementById('consentCheckbox').checked) {
         showAscendantError('Подтвердите согласие на обработку данных');

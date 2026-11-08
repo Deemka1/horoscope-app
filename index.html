@@ -9,13 +9,12 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?v=2026.11.09.5">
+    <link rel="stylesheet" href="styles.css?v=2026.11.09.6">
 </head>
 <body>
     <div class="app">
         <div class="content">
             
-            <!-- ЭКРАН: ГОРОСКОП -->
             <div class="screen active" id="screen-horoscope">
                 <div class="screen-header">
                     <h1 class="screen-title">Гороскоп</h1>
@@ -40,7 +39,6 @@
                 <div id="forecastContainer"></div>
             </div>
             
-            <!-- ЭКРАН: АСЦЕНДЕНТ -->
             <div class="screen" id="screen-ascendant">
                 <div class="screen-header">
                     <h1 class="screen-title">Асцендент</h1>
@@ -109,7 +107,6 @@
                 <div id="ascendantResult"></div>
             </div>
             
-            <!-- ЭКРАН: О СЕРВИСЕ -->
             <div class="screen" id="screen-about">
                 <div class="screen-header">
                     <h1 class="screen-title">О сервисе</h1>
@@ -119,8 +116,7 @@
                 <div class="about-section">
                     <h2 class="about-title">Астрономическая основа</h2>
                     <p class="about-text">
-                        Все расчёты выполняются на основе реальных эфемерид — математических моделей движения планет. 
-                        Мы используем библиотеку <strong>Kerykeion</strong> и открытый сервис геокодинга <strong>Nominatim</strong>.
+                        Все расчёты выполняются на основе реальных эфемерид — математических моделей движения планет, используемых в профессиональной астрологии.
                     </p>
                 </div>
                 
@@ -134,8 +130,7 @@
                 <div class="about-section">
                     <h2 class="about-title">Конфиденциальность</h2>
                     <p class="about-text">
-                        Мы <strong>не сохраняем</strong> ваши данные. Город, дата и время рождения используются только в момент расчёта 
-                        и сразу удаляются из памяти сервера.
+                        Мы <strong>не сохраняем</strong> ваши данные. Город, дата и время рождения используются только в момент расчёта и сразу удаляются из памяти сервера.
                     </p>
                     <p class="about-text">
                         <a href="privacy.html" target="_blank" class="about-link">Полная политика конфиденциальности</a>
@@ -143,14 +138,12 @@
                 </div>
                 
                 <div class="disclaimer-box">
-                    Сервис носит исключительно развлекательный характер. Астрологические расчёты не являются научно доказанными фактами 
-                    и не могут служить основанием для принятия важных жизненных, финансовых или медицинских решений.
+                    Сервис носит исключительно развлекательный характер. Астрологические расчёты не являются научно доказанными фактами и не могут служить основанием для принятия важных жизненных, финансовых или медицинских решений.
                 </div>
             </div>
             
         </div>
         
-        <!-- НИЖНЯЯ НАВИГАЦИЯ -->
         <nav class="tab-bar">
             <button class="tab-item active" data-screen="horoscope">
                 <span class="tab-icon">✦</span>
@@ -167,6 +160,6 @@
         </nav>
     </div>
 
-    <script src="app.js?v=2026.11.09.5"></script>
+    <script src="app.js?v=2026.11.09.6"></script>
 </body>
 </html>
