@@ -26,8 +26,9 @@ MERCURY_RETROGRADE_TEMPLATE = {
 today = datetime.now()
 subject = AstrologicalSubject("Today", today.year, today.month, today.day, 12, 0, "Moscow", "RU")
 
-moon_sign = subject.moon_sign_name
-mercury_retrograde = subject.mercury_retrograde
+# Правильные названия атрибутов в kerykeion
+moon_sign = subject.moon_sign
+mercury_retrograde = subject.mercury.is_retrograde
 
 horoscope = {}
 for sign in MOON_TEMPLATES.keys():
